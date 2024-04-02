@@ -8,6 +8,8 @@ setup(
     author_email='your@email.com',
     packages=find_packages(include=['core/*'],
                            exclude=['tests/*', 'docs/*']),
+    url = 'https://github.com/Billal-MOKHTARI/torch-model-manager',
+    long_description=open('README.md').read(),
     install_requires=[
         'torch',
         'numpy',
@@ -21,6 +23,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.10',
-
+        'Operating System :: OS Independent',
     ],
+
 )
