@@ -36,30 +36,7 @@ def bi_operator(op, a, b):
     elif op == '<=':
         return a <= b
     elif callable(op):
-        op(a, b)
-
-# Multiple conditions test
-def evaluate_conditions(conditions):
-    for operator, operands in conditions.items():
-        if operator == 'and':
-            result = True
-            for condition in operands:
-                key = list(condition.keys())[0]
-                value = list(condition.values())[0]
-                
-                result = result and bi_operator(key, value[0], value[1])
-                
-            return result
-        elif operator == 'or':
-            result = False
-            for condition in operands:
-                key = list(condition.keys())[0]
-                value = list(condition.values())[0]
-                result = result or bi_operator(key, value[0], value[1])
-            return result
-             
-       
-    return False
+        return op(a, b)
     
 def intersect_dicts(dict1, dict2):
     intersection_dict = {}
