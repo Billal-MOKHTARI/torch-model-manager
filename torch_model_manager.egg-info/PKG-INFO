@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: torch-model-manager
+Version: 1.0.0.dev1
+Summary: A package for managing PyTorch models
+Home-page: https://github.com/Billal-MOKHTARI/torch-model-manager
+Author: Billal MOKHTARI
+Author-email: mokhtaribillal1@gmail.com
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+
+UNKNOWN
+
