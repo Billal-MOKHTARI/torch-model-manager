@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Upload Python Package
+name: Upload Torch Model Manager to PyPi
 
 on:
   release:
@@ -15,6 +15,7 @@ on:
 permissions:
   contents: read
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   deploy:
 
@@ -26,14 +27,19 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: '3.x'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install build
+        
     - name: Build package
       run: python -m build
+      
+      # This will output the package to the dist/ directory
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+        
