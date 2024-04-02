@@ -6,10 +6,13 @@ setup(
     description='A package for managing PyTorch models',
     author='Your Name',
     author_email='your@email.com',
-    packages=find_packages(),
+    packages=find_packages(include=['core/*'],
+                           exclude=['tests/*', 'docs/*']),
     install_requires=[
         'torch',
         'numpy',
+        'torchvision',
+        'torch'
         # Add any other dependencies here
     ],
     classifiers=[
