@@ -8,7 +8,6 @@ setup(
     author_email='mokhtaribillal1@gmail.com',
     packages=find_packages(),
     url = 'https://github.com/Billal-MOKHTARI/torch-model-manager',
-    long_description=open('README.md').read(),
     install_requires=[
         'torch',
         'numpy',
