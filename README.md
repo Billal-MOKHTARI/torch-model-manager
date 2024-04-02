@@ -34,15 +34,43 @@ layers = model_manager.get_layer_by_attribute('activation', 'relu', '==')
 ```python
 # Retrieve layers that satisfy the given conditions
 conditions = {
-    'and': [
-        {'==': ['name', 'layer1']},
-        {'property': ['type', 'convolutional'], 'operator': '=='}
-    ],
-    'or': [
-        {'property': ['name', 'layer2'], 'operator': '=='},
-        {'property': ['type', 'pooling'], 'operator': '=='}
-    ]
-}
+            'and': [{'==': ('kernel_size', (1, 1))}, {'==': ('stride', (1, 1))}],
+            'or': [{'==': ('kernel_size', (3, 3))}]
+            }
 layers = model_manager.get_layer_by_attributes(conditions)
 
+```
+
+6. **Get Layer by Instance**
+```python
+# Search for layers in the model by their instance type
+layers = model_manager.get_layer_by_instance(nn.Conv2d)
+
+```
+
+7. **Delete Layer by Index**
+```python
+# Delete a layer from the model using its index
+model_manager.delete_layer_by_index(['features', 0])
+```
+
+8. **Delete Layer by Attribute**
+```python
+# Delete layers from the model based on a specific attribute
+model_manager.delete_layer_by_attribute('activation', 'relu', '==')
+```
+9. **Delete Layers by Conditions**
+```python
+# Delete layers from the model based on multiple conditions
+conditions = {
+    'and': [{'==': ('kernel_size', (1, 1))}, {'==': ('stride', (1, 1))}],
+    'or': [{'==': ('kernel_size', (3, 3))}]
+}
+model_manager.delete_layer_by_attributes(conditions)
+```
+10. **Delete Layer by Instance**
+
+```python
+# Delete layers from the model by their instance type
+model_manager.delete_layer_by_instance(nn.Conv2d)
 ```
