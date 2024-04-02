@@ -27,7 +27,7 @@ layer = model_manager.get_layer_by_index(layer_index)
 
 4. **Get Layer by Attribute**
 ```python
-layers = model_manager.get_layer_by_attribute('activation', 'relu', '==')
+layers = model_manager.get_layer_by_attribute('kernel_size', (3, 3), '==')
 ```
 
 5. **Get Layers by Conditions**
