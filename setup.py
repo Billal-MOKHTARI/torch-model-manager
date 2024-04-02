@@ -6,8 +6,7 @@ setup(
     description='A package for managing PyTorch models',
     author='Billal MOKHTARI',
     author_email='mokhtaribillal1@gmail.com',
-    packages=find_packages(include=['core'],
-                           exclude=['tests/*', 'docs/*']),
+    packages=find_packages(),
     url = 'https://github.com/Billal-MOKHTARI/torch-model-manager',
     long_description=open('README.md').read(),
     install_requires=[
