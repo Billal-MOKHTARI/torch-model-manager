@@ -4,7 +4,7 @@ import os
 import sys
 import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-import utils
+from utils import helpers
 
 class TorchModelManager:
     """
@@ -117,7 +117,7 @@ class TorchModelManager:
 
             for name, layer in model.named_children():
                 tmp.append(name)
-                if hasattr(layer, property) and utils.bi_operator(operator, self.get_attribute(layer, property), value):
+                if hasattr(layer, property) and helpers.bi_operator(operator, self.get_attribute(layer, property), value):
                     layers.append(layer)
                     indexes.append(tmp.copy())
 
@@ -132,7 +132,7 @@ class TorchModelManager:
 
         dfs(self, self.model, property, value, operator, layers, indexes)
 
-        return utils.create_dictionary(utils.convert_to_int(indexes), layers)
+        return helpers.create_dictionary(helpers.convert_to_int(indexes), layers)
     
 
     def get_layer_by_attributes(self, conditions: dict) -> dict:
@@ -192,7 +192,7 @@ class TorchModelManager:
                         tmp_statement_result = search_result
                         first_iter = False
                     else:
-                        tmp_statement_result = utils.intersect_dicts(tmp_statement_result, search_result)
+                        tmp_statement_result = helpers.intersect_dicts(tmp_statement_result, search_result)
             elif operator == 'or':
                 for stat in operands:
                     prop = list(stat.values())[0][0]
@@ -203,8 +203,8 @@ class TorchModelManager:
                         tmp_statement_result = search_result
                         first_iter = False
                     else:
-                        tmp_statement_result = utils.union_dicts(tmp_statement_result, search_result)
-            result = utils.union_dicts(result, tmp_statement_result)
+                        tmp_statement_result = helpers.union_dicts(tmp_statement_result, search_result)
+            result = helpers.union_dicts(result, tmp_statement_result)
         return result
                     
     def get_layer_by_instance(self, instance_type: type) -> dict:
@@ -238,7 +238,7 @@ class TorchModelManager:
 
         dfs(self, self.model, instance_type, layers, indexes)
 
-        return utils.create_dictionary(utils.convert_to_int(indexes), layers)    
+        return helpers.create_dictionary(helpers.convert_to_int(indexes), layers)    
 
     def delete_layer_by_index(self, index: list) -> None:
         """
