@@ -5,11 +5,11 @@ with open("README.md", "r") as fh:
 
 setup(
     name='torch-model-manager',
-    version='1.0.0.dev1',
+    version='0.0.1',
     description='A package for managing PyTorch models',
     author='Billal MOKHTARI',
     author_email='mokhtaribillal1@gmail.com',
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests', 'docs', 'utils']),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url = 'https://github.com/Billal-MOKHTARI/torch-model-manager',
