@@ -7,7 +7,7 @@
 1. **Initialization**
 ```python
 from torchvision import
-from 
+from torch_model_manager import TorchModelManager
 
 # Assume you have a PyTorch model 'model'
 model = models.vgg16(pretrained=True)
