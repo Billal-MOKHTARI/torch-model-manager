@@ -5,14 +5,15 @@ with open("README.md", "r") as fh:
 
 setup(
     name='torch-model-manager',
-    version='0.0.3',
+    version='0.0.5',
     description='A package for managing PyTorch models',
     author='Billal MOKHTARI',
     author_email='mokhtaribillal1@gmail.com',
-    packages=find_packages(exclude=['tests', 'docs', 'utils']),
+    packages=find_packages(exclude=['tests', 'docs', 'build.sh']),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url = 'https://github.com/Billal-MOKHTARI/torch-model-manager',
+    keywords=['PyTorch', 'Deep Learning', 'Machine Learning', 'High Level Programming'],
     install_requires=[
         'torch',
         'numpy',
