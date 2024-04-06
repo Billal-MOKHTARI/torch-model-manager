@@ -5,6 +5,7 @@ import sys
 import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 from utils import helpers
+from typing import List
 
 class TorchModelManager:
     """
@@ -23,8 +24,9 @@ class TorchModelManager:
             model (nn.Module): The PyTorch model to manage.
         """
         self.model = model
-        self.named_layers = dict()
-    
+        self.named_layers = self.get_named_layers()
+        self.model_depth = self.get_model_depth()
+
     def get_named_layers(self) -> dict:
         """
         Recursively fetch and store all named layers of the model.
@@ -51,6 +53,15 @@ class TorchModelManager:
             return self.named_layers
         
         return get_layers_recursive(dict(self.model.named_children()))
+
+    def get_model_depth(self):
+
+        def dict_depth(dictionary):
+            if not isinstance(dictionary, dict) or not dictionary:
+                return 0
+            return 1 + max(dict_depth(value) for value in dictionary.values())
+        
+        return dict_depth(self.named_layers)
 
     def get_attribute(self, layer: nn.Module, attribute: str) -> any:
         """
@@ -207,7 +218,7 @@ class TorchModelManager:
             result = helpers.union_dicts(result, tmp_statement_result)
         return result
                     
-    def get_layer_by_instance(self, instance_type: type) -> dict:
+    def get_layer_by_instance(self, instance_type: List[type]) -> dict:
         """
         Search for layers in the model by their instance type.
 
@@ -223,7 +234,7 @@ class TorchModelManager:
 
             for name, layer in model.named_children():
                 tmp.append(name)
-                if isinstance(layer, instance_type):
+                if helpers.is_instance_of(layer, instance_type):
                     layers.append(layer)
                     indexes.append(tmp.copy())
 
@@ -239,6 +250,39 @@ class TorchModelManager:
         dfs(self, self.model, instance_type, layers, indexes)
 
         return helpers.create_dictionary(helpers.convert_to_int(indexes), layers)    
+
+    def get_layer_by_depth(self, depth: int) -> dict:
+        """
+        Retrieves layers from the model that are at a specific depth.
+
+        Args:
+            depth (int): The depth at which the layers are located.
+
+        Returns:
+            dict: A dictionary mapping the indexes of the layers to the corresponding layer objects.
+        """
+        def dfs(self, model, depth, layers, indexes, tmp=None, current_depth=0):
+            if tmp is None:
+                tmp = []
+
+            for name, layer in model.named_children():
+                tmp.append(name)
+                if current_depth == depth:
+                    layers.append(layer)
+                    indexes.append(tmp.copy())
+                else:
+                    dfs(self, layer, depth, layers, indexes, tmp, current_depth + 1)
+
+                # Pop the last element to backtrack
+                tmp.pop()
+
+        layers = []
+        indexes = []
+
+        dfs(self, self.model, depth, layers, indexes)
+
+        return helpers.create_dictionary(helpers.convert_to_int(indexes), layers)
+
 
     def delete_layer_by_index(self, index: list) -> None:
         """
@@ -299,15 +343,15 @@ class TorchModelManager:
             search_res = self.get_layer_by_attributes(conditions)
 
 
-    def delete_layer_by_instance(self, instance_type: type) -> None:
+    def delete_layer_by_instance(self, instance_types: List[type]) -> None:
         """
         Delete layers from the model by their instance type.
 
         Args:
             instance_type (type): The instance type of the layers to delete.
         """
-        search_res = self.get_layer_by_instance(instance_type)
+        search_res = self.get_layer_by_instance(instance_types)
  
         while list(search_res.keys()) != []:
             self.delete_layer_by_index(list(search_res.keys())[0])
-            search_res = self.get_layer_by_instance(instance_type)
+            search_res = self.get_layer_by_instance(instance_types)

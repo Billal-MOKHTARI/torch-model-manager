@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 def required_kernel(in_size: int, out_size:int, stride=1, padding=1):
     assert in_size > 0, "Input size must be greater than 0"
     assert out_size > 0, "Output size must be greater than 0"
@@ -47,3 +49,6 @@ def intersect_dicts(dict1, dict2):
 
 def union_dicts(dict1, dict2):
     return {**dict1, **dict2}
+
+def is_instance_of(obj, class_names: List[type]):
+    return any(isinstance(obj, class_name) for class_name in class_names)
