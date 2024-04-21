@@ -6,7 +6,8 @@ import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 from utils import helpers
 from typing import List
-
+from torchviz import make_dot, make_dot_from_trace
+import torch
 class TorchModelManager:
     """
     A class for managing PyTorch models.
@@ -355,3 +356,14 @@ class TorchModelManager:
         while list(search_res.keys()) != []:
             self.delete_layer_by_index(list(search_res.keys())[0])
             search_res = self.get_layer_by_instance(instance_types)
+
+    def visualize(self, shape, show_attrs: bool = True, show_saved: bool = True) -> None:
+        x = torch.randn(shape)
+        make_dot(self.model(x), 
+                 params=dict(self.model.named_parameters()), 
+                 show_attrs=show_attrs, show_saved=show_saved).render("model", format="png", cleanup=True)
+        
+model = models.vgg16()
+
+model_manager = TorchModelManager(model)
+model_manager.visualize((1, 3, 224, 224))
