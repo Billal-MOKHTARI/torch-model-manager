@@ -8,6 +8,11 @@ from utils import helpers
 from typing import List
 from torchviz import make_dot, make_dot_from_trace
 import torch
+from PIL import Image
+from torchvision import transforms
+import copy
+from torchcam.methods import SmoothGradCAMpp, LayerCAM
+
 class TorchModelManager:
     """
     A class for managing PyTorch models.
@@ -357,13 +362,98 @@ class TorchModelManager:
             self.delete_layer_by_index(list(search_res.keys())[0])
             search_res = self.get_layer_by_instance(instance_types)
 
-    def visualize(self, shape, show_attrs: bool = True, show_saved: bool = True) -> None:
+    def get_layers_by_indexes(self, indexes: List[list]) -> List:
+        """
+        Get layers from the model using their indexes.
+
+        Args:
+            indexes (List[list]): A list of indexes of the layers in the model.
+
+        Returns:
+            dict: A dictionary containing the layers from the model.
+        """
+        layers = []
+        for index in indexes:
+            layers.append(self.get_layer_by_index(index))
+        return layers
+
+    def delete_layers_by_indexes(self, indexes: List[list]) -> None:
+        """
+        Delete layers from the model using their indexes.
+
+        Args:
+            indexes (List[list]): A list of indexes of the layers in the model.
+        """
+        for index in indexes:
+            self.delete_layer_by_index(index)
+
+    def visualize(self, shape, show_attrs: bool = True, show_saved: bool = True, **kwargs) -> None:
         x = torch.randn(shape)
         make_dot(self.model(x), 
                  params=dict(self.model.named_parameters()), 
-                 show_attrs=show_attrs, show_saved=show_saved).render("model", format="png", cleanup=True)
+                 show_attrs=show_attrs, show_saved=show_saved).render(kwargs)
         
-model = models.vgg16()
 
+
+    def show_hidden_layers(self, 
+                           input_data: torch.Tensor, 
+                           indexes, 
+                           row_index: List[str] = None, 
+                           show_figure: bool = True, 
+                           figure_factor: float = 1.0,
+                           save_path = None) :
+        result = []
+        layers = self.get_layers_by_indexes(indexes)
+
+        for im in input_data:
+            tmp_model = self.model.eval()
+
+            layer_extractor = LayerCAM(tmp_model, layers)
+            out = tmp_model(im.unsqueeze(0))
+            cams = layer_extractor(out.squeeze(0).argmax().item(), out)
+            
+            result.append(cams)
+
+        if row_index is None:
+            row_index = np.arange(input_data.shape[0])
+        
+        col_index = [helpers.parse_list(index, joiner='->') for index in indexes]
+
+
+        if show_figure:
+            helpers.show_images_with_indices(result, row_index, col_index, figure_factor=figure_factor)
+
+        figure = helpers.resize_and_concat_images(result)
+        if save_path is not None:
+            to_pil = transforms.ToPILImage()
+            pil_image = to_pil(figure)
+
+            # Save the PIL image to disk
+            pil_image.save(save_path)
+
+        return result, row_index, col_index
+    
+
+print(helpers.parse_list)
+
+# Read the image
+# Load the image using PIL
+image = Image.open('Landscape-Color.jpg')
+
+# Define the transformation to resize the image
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),  # Resize the image to 224x224
+    transforms.ToTensor()            # Convert the image to a PyTorch tensor
+])
+
+# Apply the transformation to the image
+resized_image = transform(image)
+
+
+model = models.vgg16(pretrained=True)
 model_manager = TorchModelManager(model)
-model_manager.visualize((1, 3, 224, 224))
+
+layers = [['features', i] for i in range(30)]
+
+result = model_manager.show_hidden_layers(resized_image.unsqueeze(0), layers, figure_factor=1.0, sho save_path='img.png')
+

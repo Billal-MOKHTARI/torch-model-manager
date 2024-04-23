@@ -1,4 +1,7 @@
-from typing import List, Tuple
+from typing import List, Any
+import matplotlib.pyplot as plt
+import torch
+from torchvision import transforms
 
 def required_kernel(in_size: int, out_size:int, stride=1, padding=1):
     assert in_size > 0, "Input size must be greater than 0"
@@ -52,3 +55,114 @@ def union_dicts(dict1, dict2):
 
 def is_instance_of(obj, class_names: List[type]):
     return any(isinstance(obj, class_name) for class_name in class_names)
+
+def parse_list(l: List[Any], joiner: str = '->'):
+    return joiner.join(map(str, l))
+
+def show_images_with_indices(list_of_lists, row_indices, col_indices, **kwargs):
+    """
+    Visualize a list of lists containing tensors of images along with row and column indices.
+
+    Args:
+        list_of_lists (list): List of lists containing tensors of images.
+        row_indices (list): List of row indices.
+        col_indices (list): List of column indices.
+        figure_factor (float): Factor to control the size of the figure.
+
+    Returns:
+        None
+    """
+    figure_factor = kwargs.get("figure_factor", 1.0)
+    font_size=kwargs.get("font_size", 12)
+
+    num_rows = len(list_of_lists)
+    num_cols = max(len(sublist) for sublist in list_of_lists)
+
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(figure_factor*num_cols, figure_factor*num_rows))
+
+    for i, sublist in enumerate(list_of_lists):
+        for j, tensor in enumerate(sublist):
+            # Get the axes for the current subplot
+            ax = axes[i, j] if num_rows > 1 else axes[j]
+
+            # Plot the image tensor
+            ax.imshow(tensor.squeeze().numpy(), cmap='gray')
+
+            # Set title with indices
+            ax.set_title(f'({row_indices[i]}, {col_indices[j]})', fontsize=font_size)
+
+            # Remove axis ticks
+            ax.axis('off')
+
+    plt.tight_layout()
+    plt.show()
+    """
+    Visualize a list of lists containing tensors of images along with row and column indices.
+
+    Args:
+        list_of_lists (list): List of lists containing tensors of images.
+        row_indices (list): List of row indices.
+        col_indices (list): List of column indices.
+
+    Returns:
+        None
+    """
+    num_rows = len(list_of_lists)
+    num_cols = max(len(sublist) for sublist in list_of_lists)
+
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(2*num_cols, 2*num_rows))
+
+    for i, sublist in enumerate(list_of_lists):
+        for j, tensor in enumerate(sublist):
+            # Get the axes for the current subplot
+            ax = axes[i, j] if num_rows > 1 else axes[j]
+
+            # Plot the image tensor
+            ax.imshow(tensor.squeeze().numpy(), cmap='gray')
+
+            # Set title with indices
+            ax.set_title(f'({row_indices[i]}, {col_indices[j]})')
+
+            # Remove axis ticks
+            ax.axis('off')
+
+    plt.tight_layout()
+    plt.show()
+
+
+def resize_and_concat_images(list_of_lists):
+    """
+    Resize images in a list of lists to the same size and concatenate them.
+
+    Args:
+        list_of_lists (list): List of lists containing tensors of images.
+
+    Returns:
+        torch.Tensor: Concatenated tensor of resized images.
+    """
+    # Determine the maximum width and height among all images
+    max_width = max(max(img.shape[2] for img in sublist) for sublist in list_of_lists)
+    max_height = max(max(img.shape[1] for img in sublist) for sublist in list_of_lists)
+
+
+    # Resize and concatenate images
+    concatenated_images = []
+    for sublist in list_of_lists:
+        resized_images = []
+        for img in sublist:
+            # Resize image to the maximum width and height
+            transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((224, 224)), 
+            transforms.ToTensor()           
+            ])
+
+            resized_img = transform(img)
+            resized_images.append(resized_img)
+        # Concatenate resized images horizontally
+        concatenated_images.append(torch.cat(resized_images, dim=2))
+    # Concatenate sublist images vertically
+    final_image = torch.cat(concatenated_images, dim=1)
+    
+    return final_image
+
