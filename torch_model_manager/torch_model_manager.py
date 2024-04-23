@@ -455,5 +455,5 @@ model_manager = TorchModelManager(model)
 
 layers = [['features', i] for i in range(30)]
 
-result = model_manager.show_hidden_layers(resized_image.unsqueeze(0), layers, figure_factor=1.0, sho save_path='img.png')
+result = model_manager.show_hidden_layers(resized_image.unsqueeze(0), layers, figure_factor=1.0, show_figure=False, save_path='img.png')
 
