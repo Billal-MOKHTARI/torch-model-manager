@@ -410,6 +410,7 @@ class TorchModelManager:
 
             layer_extractor = LayerCAM(tmp_model, layers)
             out = tmp_model(im.unsqueeze(0))
+ 
             cams = layer_extractor(out.squeeze(0).argmax().item(), out)
             
             result.append(cams)
