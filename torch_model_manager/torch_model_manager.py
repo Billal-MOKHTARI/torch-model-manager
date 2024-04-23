@@ -439,16 +439,18 @@ print(helpers.parse_list)
 
 # Read the image
 # Load the image using PIL
-image = Image.open('Landscape-Color.jpg')
-
+image_1 = Image.open('Landscape-Color.jpg')
+image_2 = Image.open('Landscape-Color.jpg')
 # Define the transformation to resize the image
 transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # Resize the image to 224x224
+    transforms.Resize((1000, 1000)),  # Resize the image to 224x224
     transforms.ToTensor()            # Convert the image to a PyTorch tensor
 ])
 
 # Apply the transformation to the image
-resized_image = transform(image)
+resized_image1 = transform(image_1)
+resized_image2 = transform(image_2)
+
 
 
 model = models.vgg16(pretrained=True)
@@ -456,5 +458,5 @@ model_manager = TorchModelManager(model)
 
 layers = [['features', i] for i in range(30)]
 
-result = model_manager.show_hidden_layers(resized_image.unsqueeze(0), layers, figure_factor=1.0, show_figure=False, save_path='img.png')
+result = model_manager.show_hidden_layers(torch.stack([resized_image1, resized_image2]), layers, figure_factor=1.0, show_figure=False, save_path='img.png')
 
