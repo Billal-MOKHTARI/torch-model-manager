@@ -153,7 +153,7 @@ def resize_and_concat_images(list_of_lists):
             # Resize image to the maximum width and height
             transform = transforms.Compose([
             transforms.ToPILImage(),
-            transforms.Resize((224, 224)), 
+            transforms.Resize((max_width, max_height)), 
             transforms.ToTensor()           
             ])
 

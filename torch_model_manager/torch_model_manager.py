@@ -10,6 +10,7 @@ from torchviz import make_dot, make_dot_from_trace
 import torch
 from PIL import Image
 from torchvision import transforms
+from neptune_manager import NeptuneManager
 import copy
 from torchcam.methods import SmoothGradCAMpp, LayerCAM
 
@@ -435,28 +436,36 @@ class TorchModelManager:
         return result, row_index, col_index
     
 
-print(helpers.parse_list)
+# print(helpers.parse_list)
 
-# Read the image
-# Load the image using PIL
-image_1 = Image.open('Landscape-Color.jpg')
-image_2 = Image.open('Landscape-Color.jpg')
-# Define the transformation to resize the image
-transform = transforms.Compose([
-    transforms.Resize((1000, 1000)),  # Resize the image to 224x224
-    transforms.ToTensor()            # Convert the image to a PyTorch tensor
-])
+# # Read the image
+# # Load the image using PIL
+# image_1 = Image.open('Landscape-Color.jpg')
+# # Define the transformation to resize the image
+# transform = transforms.Compose([
+#     transforms.Resize((224, 224)), 
+#     transforms.ToTensor()            
+# ])
 
-# Apply the transformation to the image
-resized_image1 = transform(image_1)
-resized_image2 = transform(image_2)
+# # Apply the transformation to the image
+# resized_image1 = transform(image_1)
 
 
 
-model = models.vgg16(pretrained=True)
-model_manager = TorchModelManager(model)
+# model = models.vgg16(pretrained=True)
+# model_manager = TorchModelManager(model)
 
-layers = [['features', i] for i in range(30)]
+# layers = [['features', i] for i in range(30)]
 
-result = model_manager.show_hidden_layers(torch.stack([resized_image1, resized_image2]), layers, figure_factor=1.0, show_figure=False, save_path='img.png')
+# result = model_manager.show_hidden_layers(torch.stack([resized_image1]), layers, figure_factor=1.0, show_figure=False, save_path='img.png')
 
+import neptune
+
+# 
+nm = NeptuneManager(project="Billal-MOKHTARI/Image-Clustering-based-on-Dual-Message-Passing",
+    api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI0NGRlOTNiZC0zNGZlLTRjNWUtYWEyMC00NzEwOWJkOTRhODgifQ==",
+    run_ids_path='run_ids.json')
+
+run = nm.create_run("ICBODMP-12")
+run["images"].upload("Landscape-Color.jpg")
+run["images"].upload("cube.png")
