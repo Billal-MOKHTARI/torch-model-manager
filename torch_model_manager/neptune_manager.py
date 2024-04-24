@@ -1,8 +1,9 @@
 import neptune
 from neptune import management
 from neptune.types import File
-import time
 import json
+import numpy as np
+from torchvision import transforms
 
 class NeptuneManager:
     def __init__(self, project, api_token, run_ids_path, visibility = None, workspace=None, description=None, key=None):
@@ -76,7 +77,17 @@ class NeptuneManager:
     
     def log_files_by_paths(self, run, neptune_paths, file_paths):
         for neptune_path, file_path in zip(neptune_paths, file_paths):
-            run[neptune_path].upload()
+            run[neptune_path].upload(file_path)
+    
+    def log_tensors(self, run, tensors, descriptions = None, names = None, paths = None, workspace = None, on_series = False):
+        to_pil = transforms.ToPILImage()
+        if not on_series:
+            for path, tensor in zip(paths, tensors) :
+                run[path].upload(File.as_image(to_pil(tensor)))
+        else:
+            for name, description, tensor in zip(names, descriptions, tensors):
+                run[workspace].append(File.as_image(to_pil(tensor)), name = name, description = description)
 
-# def upload_image(run, neptune_path, name, image_path, description):
-#     run[neptune_path].append(File.as_image(image_path), name=name, description=description, timestamp=time.time())
+    def delete_data(self, run, workspaces):
+        for workspace in workspaces:
+            run.pop(workspace)

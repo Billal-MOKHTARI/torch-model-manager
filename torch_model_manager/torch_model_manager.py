@@ -6,13 +6,12 @@ import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 from utils import helpers
 from typing import List
-from torchviz import make_dot, make_dot_from_trace
+from torchviz import make_dot
 import torch
 from PIL import Image
 from torchvision import transforms
-from neptune_manager import NeptuneManager
-import copy
-from torchcam.methods import SmoothGradCAMpp, LayerCAM
+from torchcam.methods import LayerCAM
+import neptune_manager as nm
 
 class TorchModelManager:
     """
@@ -402,7 +401,9 @@ class TorchModelManager:
                            row_index: List[str] = None, 
                            show_figure: bool = True, 
                            figure_factor: float = 1.0,
-                           save_path = None) :
+                           save_path = None,
+                           run = None,
+                           image_workspace = None) :
         result = []
         layers = self.get_layers_by_indexes(indexes)
 
@@ -425,6 +426,8 @@ class TorchModelManager:
         if show_figure:
             helpers.show_images_with_indices(result, row_index, col_index, figure_factor=figure_factor)
 
+
+
         figure = helpers.resize_and_concat_images(result)
         if save_path is not None:
             to_pil = transforms.ToPILImage()
@@ -433,39 +436,11 @@ class TorchModelManager:
             # Save the PIL image to disk
             pil_image.save(save_path)
 
+        if run is not None:
+            assert image_workspace is not None, "Please provide a workspace name for the images"
+            for res_row in result:
+                nm.log_tensors(run, res_row, workspace = image_workspace, on_series=True)
+                
+
         return result, row_index, col_index
     
-
-# print(helpers.parse_list)
-
-# # Read the image
-# # Load the image using PIL
-# image_1 = Image.open('Landscape-Color.jpg')
-# # Define the transformation to resize the image
-# transform = transforms.Compose([
-#     transforms.Resize((224, 224)), 
-#     transforms.ToTensor()            
-# ])
-
-# # Apply the transformation to the image
-# resized_image1 = transform(image_1)
-
-
-
-# model = models.vgg16(pretrained=True)
-# model_manager = TorchModelManager(model)
-
-# layers = [['features', i] for i in range(30)]
-
-# result = model_manager.show_hidden_layers(torch.stack([resized_image1]), layers, figure_factor=1.0, show_figure=False, save_path='img.png')
-
-import neptune
-
-# 
-nm = NeptuneManager(project="Billal-MOKHTARI/Image-Clustering-based-on-Dual-Message-Passing",
-    api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI0NGRlOTNiZC0zNGZlLTRjNWUtYWEyMC00NzEwOWJkOTRhODgifQ==",
-    run_ids_path='run_ids.json')
-
-run = nm.create_run("ICBODMP-12")
-run["images"].upload("Landscape-Color.jpg")
-run["images"].upload("cube.png")
