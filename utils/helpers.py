@@ -166,3 +166,12 @@ def resize_and_concat_images(list_of_lists):
     
     return final_image
 
+def concatenate_with_character(lst, char, mode='post'):
+    if mode == 'pre':
+        concatenated_list = [char + str(item) for item in lst]
+    elif mode == 'post':
+        concatenated_list = [str(item) + char for item in lst]
+    else:
+        raise ValueError("Invalid mode. Use 'pre' or 'post'.")
+
+    return concatenated_list

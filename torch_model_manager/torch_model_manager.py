@@ -10,6 +10,7 @@ from torchviz import make_dot
 import torch
 from torchvision import transforms
 from torchcam.methods import LayerCAM
+from torchvision import models
 
 class TorchModelManager:
     """
@@ -287,7 +288,27 @@ class TorchModelManager:
 
         return helpers.create_dictionary(helpers.convert_to_int(indexes), layers)
 
+    def get_indexes(self, indexes):
+        def dfs(self, model, indexes, tmp=None, depth=0):
+            if tmp is None:
+                tmp = []
 
+            for name, _ in model.named_children():
+                tmp.append(name)
+                indexes.append(tmp.copy())
+
+                # Recursive call
+                dfs(self, indexes, tmp, depth+1)
+
+                # Pop the last element to backtrack
+                tmp.pop()
+
+        indexes = []
+        dfs(self, self.model, indexes)
+        
+        return indexes
+    
+    
     def delete_layer_by_index(self, index: list) -> None:
         """
         Delete a layer from the model using its index.
@@ -402,7 +423,8 @@ class TorchModelManager:
                            save_path = None,
                            neptune_manager = None,
                            run = None,
-                           image_workspace = None) :
+                           image_workspace = None,
+                           ) :
         result = []
         layers = self.get_layers_by_indexes(indexes)
 
@@ -437,9 +459,15 @@ class TorchModelManager:
 
         if run is not None:
             assert image_workspace is not None, "Please provide a workspace name for the images"
-            for res_row in result:
-                neptune_manager.log_tensors(run, res_row, workspace = image_workspace, on_series=True)
+            for res_row, row_ind in zip(result, row_index):
+                neptune_manager.log_tensors(run, 
+                                            tensors=res_row, 
+                                            names = helpers.concatenate_with_character(col_index, f"{row_ind} -> ", mode='pre'), 
+                                            workspace=image_workspace,
+                                            on_series=True)
                 
 
         return result, row_index, col_index
     
+
+

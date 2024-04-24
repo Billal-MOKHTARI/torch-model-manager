@@ -2,8 +2,9 @@ import neptune
 from neptune import management
 from neptune.types import File
 import json
-import numpy as np
+
 from torchvision import transforms
+import pickle as pkl
 
 class NeptuneManager:
     def __init__(self, project, api_token, run_ids_path, visibility = None, workspace=None, description=None, key=None):
@@ -46,7 +47,8 @@ class NeptuneManager:
                 source_files = None, 
                 dependencies = None,
                 capture_strerr = True,
-                git_ref = None):
+                git_ref = None,
+                **kwargs):
 
         run_ids = self.read_json_file(self.run_ids_path)
         if name in run_ids: 
@@ -54,7 +56,8 @@ class NeptuneManager:
                 run = neptune.init_run(
                     project=self.project,
                     api_token=self.api_token,
-                    with_id=run_ids[name]
+                    with_id=run_ids[name],
+                    **kwargs
                 )
         else:
             assert name not in run_ids.keys(), "Run with the same name already exists. Please choose a different name."
@@ -68,7 +71,8 @@ class NeptuneManager:
                 source_files=source_files,
                 dependencies=dependencies,
                 capture_stderr=capture_strerr,
-                git_ref=git_ref
+                git_ref=git_ref,
+                **kwargs
             ) 
             run_id = run["sys/id"].fetch()
             self.add_to_json_file(self.run_ids_path, name, run_id)
@@ -85,9 +89,20 @@ class NeptuneManager:
             for path, tensor in zip(paths, tensors) :
                 run[path].upload(File.as_image(to_pil(tensor)))
         else:
-            for name, description, tensor in zip(names, descriptions, tensors):
-                run[workspace].append(File.as_image(to_pil(tensor)), name = name, description = description)
+            if descriptions is not None:
+                for name, description, tensor in zip(names, descriptions, tensors):
+                    run[workspace].append(File.as_image(to_pil(tensor)), name = name, description = description)
+            else:
+                for name, tensor in zip(names, tensors):
+                    run[workspace].append(File.as_image(to_pil(tensor)), name = name)
 
     def delete_data(self, run, workspaces):
         for workspace in workspaces:
             run.pop(workspace)
+            
+    def log_artifacts(self, run, data, path, workspace):
+        with open(path, 'wb') as f:
+            pkl.dump(data, f)
+        run[workspace].track_files(path)
+
+        
