@@ -1,0 +1,16 @@
+README.md
+setup.py
+tests/test_torch_model_manager/__init__.py
+tests/test_torch_model_manager/test_torch_model_manager.py
+tests/test_utils/__init__.py
+tests/test_utils/test_helpers.py
+torch_model_manager/__init__.py
+torch_model_manager/neptune_manager.py
+torch_model_manager/torch_model_manager.py
+torch_model_manager.egg-info/PKG-INFO
+torch_model_manager.egg-info/SOURCES.txt
+torch_model_manager.egg-info/dependency_links.txt
+torch_model_manager.egg-info/requires.txt
+torch_model_manager.egg-info/top_level.txt
+utils/__init__.py
+utils/helpers.py
