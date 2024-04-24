@@ -10,7 +10,6 @@ from torchviz import make_dot
 import torch
 from torchvision import transforms
 from torchcam.methods import LayerCAM
-import neptune_manager as nm
 
 class TorchModelManager:
     """
@@ -401,6 +400,7 @@ class TorchModelManager:
                            show_figure: bool = True, 
                            figure_factor: float = 1.0,
                            save_path = None,
+                           neptune_manager = None,
                            run = None,
                            image_workspace = None) :
         result = []
@@ -438,7 +438,7 @@ class TorchModelManager:
         if run is not None:
             assert image_workspace is not None, "Please provide a workspace name for the images"
             for res_row in result:
-                nm.log_tensors(run, res_row, workspace = image_workspace, on_series=True)
+                neptune_manager.log_tensors(run, res_row, workspace = image_workspace, on_series=True)
                 
 
         return result, row_index, col_index
