@@ -1,4 +1,4 @@
-import torchvision.models as models
+
 from torch import nn
 import os
 import sys
@@ -8,7 +8,6 @@ from utils import helpers
 from typing import List
 from torchviz import make_dot
 import torch
-from PIL import Image
 from torchvision import transforms
 from torchcam.methods import LayerCAM
 import neptune_manager as nm
