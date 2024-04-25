@@ -2,9 +2,9 @@ import neptune
 from neptune import management
 from neptune.types import File
 import json
-
+from colorama import Fore
 from torchvision import transforms
-import pickle as pkl
+
 
 class NeptuneManager:
     def __init__(self, project, api_token, run_ids_path, visibility = None, workspace=None, description=None, key=None):
@@ -100,9 +100,16 @@ class NeptuneManager:
         for workspace in workspaces:
             run.pop(workspace)
             
-    def log_artifacts(self, run, data, path, workspace):
-        with open(path, 'wb') as f:
-            pkl.dump(data, f)
-        run[workspace].track_files(path)
+    def log_files(self, run, data, workspace, from_path=None, extension=None):
+        try:
+            if from_path is not None:
+                run[workspace].upload(File.from_path(from_path, extension=extension))
+            else:
+                run[workspace].upload(File.as_pickle(data))
+            print(Fore.GREEN+"The data are successfully loaded to Neptune.")
+        except:
+            print(Fore.RED+"The data are not loaded to Neptune. Please check the path or the data format.\
+                  This also might due to the existence of the same path in the workspace which risks to be overweighted.")
+            
 
         
