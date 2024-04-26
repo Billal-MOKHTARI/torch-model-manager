@@ -109,7 +109,7 @@ class NeptuneManager:
             print(Fore.GREEN+"The data are successfully loaded to Neptune.")
         except:
             print(Fore.RED+"The data are not loaded to Neptune. Please check the path or the data format.\
-                  This also might due to the existence of the same path in the workspace which risks to be overweighted.")
+                  This also might due to the existence of the same path in the workspace which risks to be overweighted."+Fore.WHITE)
             
 
         
