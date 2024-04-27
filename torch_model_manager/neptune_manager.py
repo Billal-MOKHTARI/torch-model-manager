@@ -14,6 +14,8 @@ from neptune.utils import stringify_unsupported
 from torch import nn
 from io import StringIO
 from ydata_profiling import ProfileReport
+from neptune.integrations.python_logger import NeptuneHandler
+import logging
 
 
 def add_to_json_file(file_path: str, key, value):
@@ -30,16 +32,17 @@ def read_json_file(file_path):
 class NeptuneManager:
     # Define static attributes
     run_ids_path = None
-    project = None
+    project_name = None
     api_token = None
+    project = None
      
-    def __init__(self, project, api_token, run_ids_path_var, visibility = None, namespace=None, description=None, key=None):
-        NeptuneManager.project = project
+    def __init__(self, project_name, api_token, run_ids_path_var, visibility = None, namespace=None, description=None, key=None):
+        NeptuneManager.project_name = project_name
         NeptuneManager.api_token = api_token
         NeptuneManager.run_ids_path = run_ids_path_var
 
-        if NeptuneManager.project not in management.get_project_list(api_token=NeptuneManager.api_token):
-            management.create_project(name=NeptuneManager.project, 
+        if NeptuneManager.project_name not in management.get_project_list(api_token=NeptuneManager.api_token):
+            NeptuneManager.project = management.create_project(name=NeptuneManager.project_name, 
                                 namespace=namespace, 
                                 key = key,
                                 visibility=visibility, 
@@ -55,7 +58,11 @@ class NeptuneManager:
         return management.get_project_list()
     
     def delete_project(self):
-        management.delete_project(project=NeptuneManager.project)
+        management.delete_project(project=NeptuneManager.project_name)
+    
+    def fetch_runs_table(self):
+        runs_table_df = NeptuneManager.project.fetch_runs_table().to_pandas()
+        return runs_table_df
     
     class Run:
         def __init__(self, name, 
@@ -65,6 +72,7 @@ class NeptuneManager:
                     capture_strerr = True,
                     git_ref = None,
                     **kwargs):
+            self.run = None
             # Try to read the JSON file
             try:
 
@@ -75,7 +83,7 @@ class NeptuneManager:
                     
                     if run_ids is not None:
                         self.run = neptune.init_run(
-                            project=NeptuneManager.project,
+                            project=NeptuneManager.project_name,
                             api_token=NeptuneManager.api_token,
                             with_id=run_ids[name],
                             **kwargs
@@ -87,7 +95,7 @@ class NeptuneManager:
                     assert name not in run_ids.keys(), "Run with the same name already exists. Please choose a different name."    
                     
                     self.run = neptune.init_run(
-                        project=NeptuneManager.project,
+                        project=NeptuneManager.project_name,
                         api_token=NeptuneManager.api_token,
                         name = name,
                         description=description,
@@ -142,7 +150,7 @@ class NeptuneManager:
                     This also might due to the existence of the same path in the namespace which risks to be overweighted."+Fore.WHITE)
         
         def log_dataframe(self, 
-                          dataframe: pd.Dataframe, 
+                          dataframe: pd.DataFrame, 
                           namespace: str, 
                           df_name: str,
                           df_format: bool= True,
@@ -199,7 +207,8 @@ class NeptuneManager:
             self.init_npt_logger(model, **kwargs)
             self.npt_logger.log_checkpoint(checkpoint_name)
             
-            
+            print(Fore.GREEN+"The checkpoint is successfully logged to Neptune.", Fore.WHITE)
+
         def hyperparams_logger(self, 
                                model: nn.Module, 
                                hyperparams: dict, 
@@ -210,6 +219,29 @@ class NeptuneManager:
                 hyperparams
             )
             
+            print(Fore.GREEN+"The hyperparameters are successfully logged to Neptune.", Fore.WHITE)
+            
+        def log_figure(self, 
+                       figure, 
+                       namespace: str):
+            self.run[namespace].upload(File.as_html(figure))
+            print(Fore.GREEN+"The figure is successfully uploaded to Neptune.", Fore.WHITE)
+        
+        def log_text(self, text, namespace, logger_name, level):
+            assert level in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], "The level should be one of the following: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'"
+            level = eval(f"logging.{level}")
+            logger = logging.getLogger(logger_name)
+            logger.setLevel(level)
+            npt_handler = NeptuneHandler(run=self.run)
+            
+            logger.addHandler(npt_handler)
+            self.run[namespace].log(text)
+            print(Fore.GREEN+"The text is successfully logged to Neptune.", Fore.WHITE)
+        
+        def log_args(self, args, namespace):
+            self.run[namespace] = args
+            
+            print(Fore.GREEN+"The arguments are successfully logged to Neptune.", Fore.WHITE)
         
         def delete_data(self, namespaces):
             for namespace in namespaces:
@@ -221,7 +253,7 @@ class NeptuneManager:
            
     
 
-nm = NeptuneManager(project="Billal-MOKHTARI/Image-Clustering-based-on-Dual-Message-Passing",
+nm = NeptuneManager(project_name="Billal-MOKHTARI/Image-Clustering-based-on-Dual-Message-Passing",
                     api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI0NGRlOTNiZC0zNGZlLTRjNWUtYWEyMC00NzEwOWJkOTRhODgifQ==",
                     run_ids_path_var="run_ids.json")
 
@@ -237,14 +269,8 @@ parameters = {
 }
 
 
-vgg = models.vgg16()
 run = nm.Run(name="Test2")
 df = pd.DataFrame(np.random.randint(0,100,size=(100, 4)), columns=list('ABCD'))
 
-run.log_dataframe(dataframe=df, 
-                    df_name="df",
-                  namespace="dfs", 
-                  df_format=True, 
-                  csv_format=True,
-                  profile_report_title="Test",
-                  profile_report_name="profile_report")
+
+print(nm.fetch_runs_table())
