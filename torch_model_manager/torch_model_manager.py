@@ -410,11 +410,11 @@ class TorchModelManager:
         x = torch.randn(shape)
         make_dot(self.model(x), 
                  params=dict(self.model.named_parameters()), 
-                 show_attrs=show_attrs, show_saved=show_saved).render(kwargs)
+                 show_attrs=show_attrs, show_saved=show_saved).render(**kwargs)
         
 
 
-    def show_hidden_layers(self, 
+    def show_hidden_conv2d(self, 
                            input_data: torch.Tensor, 
                            indexes, 
                            row_index: List[str] = None, 

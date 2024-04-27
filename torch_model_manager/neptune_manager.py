@@ -16,7 +16,12 @@ from io import StringIO
 from ydata_profiling import ProfileReport
 from neptune.integrations.python_logger import NeptuneHandler
 import logging
-
+from torchviz import make_dot
+from torchcam.methods import LayerCAM
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+from utils import helpers
+import torch_model_manager as tmm
 
 def add_to_json_file(file_path: str, key, value):
     data = read_json_file(file_path)
@@ -114,7 +119,7 @@ class NeptuneManager:
             
         # Log the tensors to Neptune
         def log_tensors(self, 
-                        tensors: torch.Tensor, 
+                        tensors, 
                         descriptions: List[str] = None, 
                         names: List[str] = None, 
                         paths: List[str] = None, 
@@ -125,6 +130,7 @@ class NeptuneManager:
             
             # If the images are not uploaded in series, log them separately each one with its path
             if not on_series:
+            
                 for path, tensor in zip(paths, tensors) :
                     self.run[path].upload(File.as_image(to_pil(tensor)))
             
@@ -137,7 +143,7 @@ class NeptuneManager:
                     for name, tensor in zip(names, tensors):
                         self.run[namespace].append(File.as_image(to_pil(tensor)), name = name)            
 
-
+            print(Fore.GREEN+"The tensors are successfully uploaded to Neptune.", Fore.WHITE)
         def log_files(self, data, namespace, from_path=None, extension=None):
             try:
                 if from_path is not None:
@@ -183,8 +189,8 @@ class NeptuneManager:
                             log_model_diagram: bool = True, 
                             log_gradients: bool = True, 
                             log_parameters: bool = True, 
-                            log_freq: int = 1):
-            
+                            log_freq: int = 1,
+                            **kwargs):
             self.npt_logger = NeptuneLogger(
                 run=self.run,
                 base_namespace=base_namespace,
@@ -193,7 +199,21 @@ class NeptuneManager:
                 log_gradients=log_gradients,
                 log_parameters=log_parameters,
                 log_freq=log_freq,
+
             )
+            
+            output = kwargs.get("output", None)
+            show_attrs = kwargs.get("show_attrs", True)
+            show_saved = kwargs.get("show_saved", True)
+            render_args = kwargs.get("render_args", {"filename": "model", "format": "png"})
+            
+            if output is not None:
+                make_dot(output, 
+                    params=dict(model.named_parameters()), 
+                    show_attrs=show_attrs, show_saved=show_saved).render(**render_args)
+                self.run[self.npt_logger.base_namespace]["model"][render_args["filename"]].upload(File.from_path(render_args["filename"]+"."+render_args["format"]), wait=True)
+                
+            print(Fore.GREEN+"The Neptune Logger is successfully initialized.", Fore.WHITE)
         
         def track_metric(self, 
                          model: nn.Module, 
@@ -249,8 +269,64 @@ class NeptuneManager:
 
         def stop_run(self):
             self.run.stop()
+                
+        def log_hidden_conv2d(self, 
+                                model: nn.Module,
+                                input_data: torch.Tensor, 
+                                indexes, 
+                                row_index: List[str] = None, 
+                                save_path = None,
+                                namespace = None,
+                                ) :
+                assert namespace is not None, "Please provide an image namespace."
             
-           
+                # Define the model mnager
+                model_manager= tmm.TorchModelManager(model)
+                
+                # Get the needed layers
+                layers = model_manager.get_layers_by_indexes(indexes)
+                
+                result = []
+                for im in input_data:
+                    # Set the model to evaluation mode
+                    tmp_model = model.eval()
+
+                    # Extract the CAMs
+                    layer_extractor = LayerCAM(tmp_model, layers)
+                    out = tmp_model(im.unsqueeze(0))
+                    cams = layer_extractor(out.squeeze(0).argmax().item(), out)
+                    result.append(cams)
+
+                if row_index is None:
+                    row_index = np.arange(input_data.shape[0])
+                
+                # Parse the indexes
+                col_index = [helpers.parse_list(index, joiner='->') for index in indexes]
+
+                # Concatenate the images
+                figure = helpers.resize_and_concat_images(result)
+                
+                # Save the figure to disk if save_path is provided
+                if save_path is not None:
+                    to_pil = transforms.ToPILImage()
+                    pil_image = to_pil(figure)
+
+                    # Save the PIL image to disk
+                    pil_image.save(save_path)
+                
+                # Log the figure to Neptune
+                for res_row, row_ind in zip(result, row_index):
+                    
+                    self.log_tensors(tensors=res_row, 
+                                    names = helpers.concatenate_with_character(col_index, f"{row_ind} -> ", mode='pre'), 
+                                    namespace=namespace,
+                                    on_series=True)
+                        
+                print(Fore.GREEN+"The hidden conv2d layer outputs are successfully logged to Neptune.", Fore.WHITE)
+                return result, row_index, col_index
+            
+
+            
     
 
 nm = NeptuneManager(project_name="Billal-MOKHTARI/Image-Clustering-based-on-Dual-Message-Passing",
@@ -270,7 +346,6 @@ parameters = {
 
 
 run = nm.Run(name="Test2")
-df = pd.DataFrame(np.random.randint(0,100,size=(100, 4)), columns=list('ABCD'))
 
-
-print(nm.fetch_runs_table())
+model= models.vgg16()
+run.log_hidden_conv2d(model, torch.randn(1, 3, 224, 224), indexes=[["features", 0], ["features", 1]], namespace="hidden_conv2d")
