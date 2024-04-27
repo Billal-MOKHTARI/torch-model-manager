@@ -170,12 +170,12 @@ class NeptuneManager:
             
         
         def init_npt_logger(self, 
-                            model,
-                            base_namespace = 'training', 
-                            log_model_diagram = True, 
-                            log_gradients = True, 
-                            log_parameters = True, 
-                            log_freq = 1):
+                            model: nn.Module,
+                            base_namespace: str = 'training', 
+                            log_model_diagram: bool = True, 
+                            log_gradients: bool = True, 
+                            log_parameters: bool = True, 
+                            log_freq: int = 1):
             
             self.npt_logger = NeptuneLogger(
                 run=self.run,
@@ -188,9 +188,9 @@ class NeptuneManager:
             )
         
         def track_metric(self, 
-                         namespace, 
-                         metric, 
-                         model, 
+                         model: nn.Module, 
+                         metric: Union[float, int],
+                         namespace: str, 
                          **kwargs):
             self.init_npt_logger(model, **kwargs)
             self.run[self.npt_logger.base_namespace][namespace].append(metric)
@@ -203,17 +203,10 @@ class NeptuneManager:
         def hyperparams_logger(self, 
                                model: nn.Module, 
                                hyperparams: dict, 
-                               log_freq: int = 30,
-                               namespace: str ="hyperparams"):  
-            npt_logger = NeptuneLogger(
-                run=self.run,
-                model=model,
-                log_model_diagram=True,
-                log_gradients=True,
-                log_parameters=True,
-                log_freq=log_freq,
-            )
-            self.run[npt_logger.base_namespace][namespace] = stringify_unsupported( 
+                               namespace: str ="hyperparams",
+                               **kwargs):  
+            self.init_npt_logger(model, kwargs)
+            self.run[self.npt_logger.base_namespace][namespace] = stringify_unsupported( 
                 hyperparams
             )
             
