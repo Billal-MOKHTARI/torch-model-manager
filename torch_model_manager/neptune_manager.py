@@ -17,11 +17,12 @@ from ydata_profiling import ProfileReport
 from neptune.integrations.python_logger import NeptuneHandler
 import logging
 from torchviz import make_dot
-from torchcam.methods import LayerCAM
+from torchcam.methods import LayerCAM, GradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 from utils import helpers
 import torch_model_manager as tmm
+from torchcam.utils import overlay_mask
 
 def add_to_json_file(file_path: str, key, value):
     data = read_json_file(file_path)
@@ -274,12 +275,21 @@ class NeptuneManager:
                                 model: nn.Module,
                                 input_data: torch.Tensor, 
                                 indexes, 
+                                method="layercam",
                                 row_index: List[str] = None, 
                                 save_path = None,
                                 namespace = None,
+                                **kwargs
                                 ) :
                 assert namespace is not None, "Please provide an image namespace."
-            
+
+                explainer = None
+                if method == "layercam":
+                    explainer = LayerCAM
+                elif method == "gradcam":
+                    explainer = GradCAM
+                elif method == "smooth_gradcam_pp":
+                    explainer = SmoothGradCAMpp
                 # Define the model mnager
                 model_manager= tmm.TorchModelManager(model)
                 
@@ -292,10 +302,27 @@ class NeptuneManager:
                     tmp_model = model.eval()
 
                     # Extract the CAMs
-                    layer_extractor = LayerCAM(tmp_model, layers)
+                    layer_extractor = explainer(tmp_model, layers)
                     out = tmp_model(im.unsqueeze(0))
                     cams = layer_extractor(out.squeeze(0).argmax().item(), out)
+                    
+                    
+                    if method != "layercam":
+                        alpha = kwargs.get("alpha", 0.5)
+                        to_pil_image = transforms.ToPILImage()
+                        
+                        row_imgs = []
+                        # Resize the CAM and overlay it
+                        for cam in cams:
+                            cams = overlay_mask(to_pil_image(im), to_pil_image(cam.squeeze(0)), alpha=alpha)
+                            cams = transforms.ToTensor()(cams)
+                            row_imgs.append(cams)
+                            cams = row_imgs
+                        # Display it
+                        
+                    
                     result.append(cams)
+
 
                 if row_index is None:
                     row_index = np.arange(input_data.shape[0])
@@ -348,4 +375,4 @@ parameters = {
 run = nm.Run(name="Test2")
 
 model= models.vgg16()
-run.log_hidden_conv2d(model, torch.randn(1, 3, 224, 224), indexes=[["features", 0], ["features", 1]], namespace="hidden_conv2d")
+run.log_hidden_conv2d(model, torch.randn(1, 3, 224, 224), indexes=[["features", 0], ["features", 1]], namespace="hidden_conv2d", method="smooth_gradcam_pp")
