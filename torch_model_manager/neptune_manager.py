@@ -17,7 +17,7 @@ from ydata_profiling import ProfileReport
 from neptune.integrations.python_logger import NeptuneHandler
 import logging
 from torchviz import make_dot
-from torchcam.methods import LayerCAM, GradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM
+from torchcam.methods import LayerCAM, GradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISCAM, XGradCAM 
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 from utils import helpers
@@ -282,14 +282,19 @@ class NeptuneManager:
                                 **kwargs
                                 ) :
                 assert namespace is not None, "Please provide an image namespace."
-
-                explainer = None
-                if method == "layercam":
-                    explainer = LayerCAM
-                elif method == "gradcam":
-                    explainer = GradCAM
-                elif method == "smooth_gradcam_pp":
-                    explainer = SmoothGradCAMpp
+                explainers = {
+                    "layercam": LayerCAM,
+                    "gradcam": GradCAM,
+                    "smooth_gradcampp": SmoothGradCAMpp,
+                    "gradcampp": GradCAMpp,
+                    "scorecam": ScoreCAM,
+                    "sscam": SSCAM,
+                    "iscam": ISCAM,
+                    "xgradcam": XGradCAM
+                    
+                }
+                explainer = explainers[method]
+                
                 # Define the model mnager
                 model_manager= tmm.TorchModelManager(model)
                 
@@ -352,27 +357,23 @@ class NeptuneManager:
                 print(Fore.GREEN+"The hidden conv2d layer outputs are successfully logged to Neptune.", Fore.WHITE)
                 return result, row_index, col_index
             
+# nm = NeptuneManager(project_name="Billal-MOKHTARI/Image-Clustering-based-on-Dual-Message-Passing",
+#                     api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI0NGRlOTNiZC0zNGZlLTRjNWUtYWEyMC00NzEwOWJkOTRhODgifQ==",
+#                     run_ids_path_var="run_ids.json")
 
-            
-    
-
-nm = NeptuneManager(project_name="Billal-MOKHTARI/Image-Clustering-based-on-Dual-Message-Passing",
-                    api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI0NGRlOTNiZC0zNGZlLTRjNWUtYWEyMC00NzEwOWJkOTRhODgifQ==",
-                    run_ids_path_var="run_ids.json")
-
-from torchvision import models
-parameters = {
-    "lr": 1e-2,
-    "bs": 128,
-    "input_sz": 32 * 32 * 3,
-    "n_classes": 10,
-    "model_filename": "basemodel",
-    "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-    "epochs": 2,
-}
+# from torchvision import models
+# parameters = {
+#     "lr": 1e-2,
+#     "bs": 128,
+#     "input_sz": 32 * 32 * 3,
+#     "n_classes": 10,
+#     "model_filename": "basemodel",
+#     "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+#     "epochs": 2,
+# }
 
 
-run = nm.Run(name="Test2")
+# run = nm.Run(name="Test2")
 
-model= models.vgg16()
-run.log_hidden_conv2d(model, torch.randn(1, 3, 224, 224), indexes=[["features", 0], ["features", 1]], namespace="hidden_conv2d", method="smooth_gradcam_pp")
+# model= models.vgg16()
+# run.log_hidden_conv2d(model, torch.randn(1, 3, 224, 224), indexes=[["features", 0], ["features", 1]], namespace="hidden_conv2d", method="scam")
