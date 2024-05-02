@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: torch-model-manager
-Version: 0.0.6
+Version: 0.2.0.dev2
 Summary: A package for managing PyTorch models
 Home-page: https://github.com/Billal-MOKHTARI/torch-model-manager
 Author: Billal MOKHTARI
@@ -14,6 +14,8 @@ Requires-Dist: torch
 Requires-Dist: numpy
 Requires-Dist: torchvision
 Requires-Dist: torch
+Requires-Dist: torchcam
+Requires-Dist: neptune
 
 # Torch Model Manager
 
