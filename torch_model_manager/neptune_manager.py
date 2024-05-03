@@ -351,7 +351,7 @@ class NeptuneManager:
             
             print(Fore.GREEN+"The arguments are successfully logged to Neptune.", Fore.WHITE)
         
-        def delete_data(self, namespaces):
+        def delete_data(self, namespaces, wait = False):
             """
             Delete data from the run.
 
@@ -359,7 +359,7 @@ class NeptuneManager:
                 namespaces: The namespaces to delete.
             """
             for namespace in namespaces:
-                self.run.pop(namespace)
+                self.run.pop(namespace, wait = wait)
 
         def stop_run(self):
             """

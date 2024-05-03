@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
-version = '0.2.0.dev1'
+
 setup(
     name='torch-model-manager',
-    version='0.2.0.dev2',
+    version='0.2.0.dev3',
     description='A package for managing PyTorch models',
     author='Billal MOKHTARI',
     author_email='mokhtaribillal1@gmail.com',
