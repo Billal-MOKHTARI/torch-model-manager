@@ -11,6 +11,10 @@ import torch
 from torchvision import transforms
 from torchcam.methods import LayerCAM
 from torchvision import models
+from torch.nn.init import xavier_uniform_, kaiming_uniform_, constant_, dirac_, kaiming_normal_, \
+                            xavier_normal_, uniform_, eye_, normal_, sparse_, ones_, orthogonal_, \
+                            zeros_, trunc_normal_
+                                
 
 class TorchModelManager:
     """
@@ -469,5 +473,37 @@ class TorchModelManager:
 
         return result, row_index, col_index
     
+    def init_model_parameters(self, method_weight, method_bias, **kwargs):
+        weight_args = kwargs.get('weight_args', None)
+        bias_args = kwargs.get('bias_args', None)
+        
+        for layer in self.model.children():
+            if isinstance(layer, (nn.Conv2d, 
+                        nn.Linear, 
+                        nn.ConvTranspose2d, 
+                        nn.Conv3d, 
+                        nn.ConvTranspose3d,
+                        nn.Embedding)):
+                
+                weight_initializer = eval(method_weight)
+                bias_initializer = eval(method_bias)
+                
+                weight_initializer(layer.weight, weight_args)
+                if layer.bias is not None:
+                    bias_initializer(layer.bias, bias_args)
+                    
+                
+                            
+                
+                
+                        
+# model = nn.Embedding(12, 13)
+# for layer in model.modules():
+#     if isinstance(layer, (nn.Conv2d, nn.Linear, nn.Embedding)):
+#         layer.weight.data.fill_(1)
 
-
+        
+# for layer in model.modules():
+#     if isinstance(layer, (nn.Conv2d, nn.Linear, nn.Embedding)):
+#         print(layer.weight.data)
+  

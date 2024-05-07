@@ -497,13 +497,13 @@ class TorchModelManager:
                 
                 
                         
-model = nn.Embedding(12, 13)
-for layer in model.modules():
-    if isinstance(layer, (nn.Conv2d, nn.Linear, nn.Embedding)):
-        layer.weight.data.fill_(1)
+# model = nn.Embedding(12, 13)
+# for layer in model.modules():
+#     if isinstance(layer, (nn.Conv2d, nn.Linear, nn.Embedding)):
+#         layer.weight.data.fill_(1)
 
         
-for layer in model.modules():
-    if isinstance(layer, (nn.Conv2d, nn.Linear, nn.Embedding)):
-        print(layer.weight.data)
+# for layer in model.modules():
+#     if isinstance(layer, (nn.Conv2d, nn.Linear, nn.Embedding)):
+#         print(layer.weight.data)
   

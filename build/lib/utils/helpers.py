@@ -225,3 +225,11 @@ def delete_json_item(json_file, key_list):
     # Save the modified JSON data back to the file
     with open(json_file, 'w') as f:
         json.dump(data, f, indent=4)
+
+def sort_string_list(string_list, order='asc'):
+    def alphanum_key(s):
+        import re
+        return [int(text) if text.isdigit() else text.lower()
+                for text in re.split('([0-9]+)', s)]
+
+    return sorted(string_list, key=alphanum_key, reverse=(order == 'desc'))
