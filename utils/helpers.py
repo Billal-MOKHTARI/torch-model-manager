@@ -205,3 +205,23 @@ def read_json_file(file_path):
     with open(file_path, 'r') as json_file:
         data = json.load(json_file)
     return data
+
+
+def delete_json_item(json_file, key_list):
+    # Load JSON data from file
+    with open(json_file, 'r') as f:
+        data = json.load(f)
+    
+    # Function to recursively search and delete item by key list
+    def recursive_delete(d, keys):
+        if len(keys) == 1:
+            del d[keys[0]]
+        else:
+            recursive_delete(d[keys[0]], keys[1:])
+    
+    # Recursively search and delete item by key list
+    recursive_delete(data, key_list)
+    
+    # Save the modified JSON data back to the file
+    with open(json_file, 'w') as f:
+        json.dump(data, f, indent=4)

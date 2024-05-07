@@ -123,28 +123,29 @@ class NeptuneManager:
                 git_ref (str, optional): The git reference of the run. Defaults to None.
             """
             self.run = None
+            self.name = name
             # Try to read the JSON file
             try:
                 run_ids = helpers.read_json_file(NeptuneManager.run_ids_path)
                 # If the name of the run already exists in the JSON file, load the run with the same name.
-                if name in list(run_ids.keys()): 
+                if self.name in list(run_ids.keys()): 
                     if run_ids is not None:
                         self.run = neptune.init_run(
                             project=NeptuneManager.project_name,
                             api_token=NeptuneManager.api_token,
-                            with_id=run_ids[name],
+                            with_id=run_ids[self.name],
                             **kwargs
                         )
                         
                 else:
                     # Create a new run
                     # The names of the runs should all be different
-                    assert name not in list(run_ids.keys()), "Run with the same name already exists. Please choose a different name."    
+                    assert self.name not in list(run_ids.keys()), "Run with the same name already exists. Please choose a different name."    
                     
                     self.run = neptune.init_run(
                         project=NeptuneManager.project_name,
                         api_token=NeptuneManager.api_token,
-                        name=name,
+                        name=self.name,
                         description=description,
                         tags=tags,
                         source_files=source_files,
@@ -154,7 +155,7 @@ class NeptuneManager:
                     ) 
                     # Retrieve the id of the run and store it in the file with its associated name
                     self.run_id = self.run["sys/id"].fetch()
-                    helpers.add_to_json_file(NeptuneManager.run_ids_path, name, self.run_id)
+                    helpers.add_to_json_file(NeptuneManager.run_ids_path, self.name, self.run_id)
             except:
                 print(Fore.RED+"The JSON file is not found. Please check the path."+Fore.WHITE)
             
@@ -196,7 +197,7 @@ class NeptuneManager:
 
             print(Fore.GREEN+"The tensors are successfully uploaded to Neptune.", Fore.WHITE)
         
-        def log_files(self, data, namespace, from_path=None, extension=None):
+        def log_files(self, data, namespace, from_path=None, extension=None, wait = False):
             """
             Log files to Neptune.
 
@@ -208,9 +209,9 @@ class NeptuneManager:
             """
             try:
                 if from_path is not None:
-                    self.run[namespace].upload(File.from_path(from_path, extension=extension))
+                    self.run[namespace].upload(File.from_path(from_path, extension=extension), wait=wait)
                 else:
-                    self.run[namespace].upload(File.as_pickle(data))
+                    self.run[namespace].upload(File.as_pickle(data), wait=wait)
                 print(Fore.GREEN+"The data are successfully loaded to Neptune."+Fore.WHITE)
             except:
                 print(Fore.RED+"The data are not loaded to Neptune. Please check the path or the data format.\
@@ -272,7 +273,7 @@ class NeptuneManager:
             """
             self.run[namespace].append(metric, step=step, timestamp=timestamp, wait=wait)
 
-        def log_checkpoint(self, namespace, model, optimizer, loss, epoch, **kwargs):
+        def log_checkpoint(self, namespace, model, optimizer, loss, epoch, wait=False, **kwargs):
             state_dict = {
                 "model_state_dict": model.state_dict(),
                 "optimizer_state_dict": optimizer.state_dict(),
@@ -281,11 +282,11 @@ class NeptuneManager:
                 **kwargs
             }
             
-            tmp_file = tempfile.NamedTemporaryFile(suffix = '.pth', delete=False)
+            tmp_file = tempfile.NamedTemporaryFile(suffix = '.pth', delete=True)
             torch.save(state_dict, tmp_file.name)
                 
                 
-            self.log_files(namespace=namespace, data= None, from_path=tmp_file.name, extension='pth')
+            self.log_files(namespace=namespace, data= None, from_path=tmp_file.name, extension='pth', wait=wait)
             
             print(Fore.GREEN+"The checkpoint is successfully logged to Neptune.", Fore.WHITE)
 
@@ -506,32 +507,20 @@ class NeptuneManager:
 #                     api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI0NGRlOTNiZC0zNGZlLTRjNWUtYWEyMC00NzEwOWJkOTRhODgifQ==",
 #                     run_ids_path="run_ids.json")
 
-# from torchvision import models
-# parameters = {
-#     "lr": 1e-2,
-#     "bs": 128,
-#     "input_sz": 32 * 32 * 3,
-#     "n_classes": 10,
-#     "model_filename": "basemodel",
-#     "device": torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-#     "epochs": 2,
-# }
 
 
 # run = nm.Run(name="Image GAT Message Passing")
 # data = run.fetch_pkl_data("embeddings")
 # print(data)
 
-# model = models.resnet18(pretrained=True)
-# optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-# loss = "MSE"
-# run.log_checkpoint(namespace="checkpoints", model=model, optimizer=optimizer, loss=loss, epoch=1)
+# from mrg32k3a.mrg32k3a import MRG32k3a
+# from matplotlib import pyplot as plt
+# from torch.nn import init
 
-# chkpt = run.fetch_data("training/checkpoints")
-# print(chkpt)
 
-# data = run.fetch_data("training/losses/MSE")
-# print(data)
-# import time
-# for epoch in range(100):
-#     run.track_metric(epoch, "training/losses/MSE", step=epoch, timestamp=time.time(), wait=True)
+
+# a = init.kaiming_uniform_(torch.empty(10000, 10000), generator=torch.Generator(device="cpu"))
+# print(a.shape)
+# plt.hist2d(a[0], a[1], bins=200)
+# plt.show()
+
