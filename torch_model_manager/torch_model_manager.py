@@ -474,34 +474,45 @@ class TorchModelManager:
         return result, row_index, col_index
     
     def init_model_parameters(self, method_weight, method_bias, **kwargs):
-        weight_args = kwargs.get('weight_args', None)
-        bias_args = kwargs.get('bias_args', None)
+        weight_args = kwargs.get('weight_args', {})
+        bias_args = kwargs.get('bias_args', {})
         
-        for layer in self.model.children():
+        def init_layer(layer):
             if isinstance(layer, (nn.Conv2d, 
                         nn.Linear, 
                         nn.ConvTranspose2d, 
                         nn.Conv3d, 
                         nn.ConvTranspose3d,
-                        nn.Embedding)):
+                        nn.Embedding,
+                        nn.BatchNorm1d,
+                        nn.BatchNorm2d,
+                        nn.BatchNorm3d)):
                 
                 weight_initializer = eval(method_weight)
                 bias_initializer = eval(method_bias)
                 
-                weight_initializer(layer.weight, weight_args)
+                weight_initializer(layer.weight, **weight_args)
                 if layer.bias is not None:
-                    bias_initializer(layer.bias, bias_args)
-                    
-                
-                            
-                
-                
-                        
-# model = nn.Embedding(12, 13)
-# for layer in model.modules():
-#     if isinstance(layer, (nn.Conv2d, nn.Linear, nn.Embedding)):
-#         layer.weight.data.fill_(1)
+                    bias_initializer(layer.bias, **bias_args)
+            
+            # Recursively initialize parameters for child layers
+            for sub_layer in layer.children():
+                init_layer(sub_layer)
+        
+        # Start initialization from the top-level layers
+        for layer in self.model.children():
+                init_layer(layer)
 
+        return self.model.state_dict()
+            
+                    
+                        
+# model = models.vgg16()
+# tmm = TorchModelManager(model)
+
+# tmm.init_model_parameters('zeros_', 'zeros_')
+
+# print(model)
         
 # for layer in model.modules():
 #     if isinstance(layer, (nn.Conv2d, nn.Linear, nn.Embedding)):
