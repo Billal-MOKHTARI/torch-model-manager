@@ -488,8 +488,8 @@ class TorchModelManager:
                         nn.BatchNorm2d,
                         nn.BatchNorm3d)):
                 
-                weight_initializer = eval(method_weight)
-                bias_initializer = eval(method_bias)
+                weight_initializer = eval(f"{method_weight}_")
+                bias_initializer = eval(f"{method_bias}_")
                 
                 weight_initializer(layer.weight, **weight_args)
                 if layer.bias is not None:
