@@ -457,11 +457,7 @@ class NeptuneManager:
         def log_checkpoint(self, namespace, model, optimizer, loss, epoch, keep=3, wait=False, **kwargs):
             parent_namespace = "/".join(namespace.split("/")[:-1])
 
-            struct = helpers.sort_string_list(self.run.fetch_files())
 
-            if len(struct) >= keep:
-                for file in struct[:-keep+1]:
-                    self.run.pop(os.path.join(parent_namespace, file), wait=wait)
             state_dict = {
                 "model_state_dict": model.state_dict(),
                 "optimizer_state_dict": optimizer.state_dict(),
@@ -476,6 +472,13 @@ class NeptuneManager:
             self.log_files(namespace=namespace, data= None, from_path=tmp_file.name, extension='pth', wait=wait)
             
             print(Fore.GREEN+"The checkpoint is successfully logged to Neptune.", Fore.WHITE)
+
+
+            struct = helpers.sort_string_list(self.fetch_files(parent_namespace))
+
+            if len(struct) > keep:
+                for file in struct[:-keep]:
+                    self.run.pop(os.path.join(parent_namespace, file), wait=wait)
 
         def log_hyperparameters(self, 
                                hyperparams: dict, 
@@ -696,7 +699,11 @@ nm = NeptuneManager(project_name="Billal-MOKHTARI/Image-Clustering-based-on-Dual
 
 
 
-# run = nm.Run(name="Image GAT Message Passing")
+# run = nm.Run(name="IGMP6")
+# namespace = "training/hyperparameters/graph/order"
+# parent_namespace = "/".join(namespace.split("/")[:-2])
+# struct = helpers.sort_string_list(run.fetch_files(parent_namespace))
+# print(struct)
 # data = run.fetch_pkl_data("embeddings")
 # print(data)
 
