@@ -657,7 +657,15 @@ class NeptuneManager:
             return result, row_index, col_index
         
         def fetch_pkl_data(self, namespace: str):
-            
+            """
+            Fetches pickle data from Neptune.
+
+            Args:
+                namespace (str): The namespace where the data is stored.
+
+            Returns:
+                data: The fetched data.
+            """
             tmp_file = tempfile.NamedTemporaryFile(delete=True)
             try :
                 self.run[namespace].download(tmp_file.name)
@@ -671,6 +679,16 @@ class NeptuneManager:
                 print(Fore.RED+"The data is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
 
         def load_model_checkpoint(self, namespace, **kwargs):
+            """
+            Loads a model checkpoint from Neptune.
+
+            Args:
+                namespace (str): The namespace where the checkpoint is stored.
+                **kwargs: Additional keyword arguments for torch.load().
+
+            Returns:
+                state_dict: The loaded model state dictionary.
+            """
             tmp_file = tempfile.NamedTemporaryFile(delete=True)
             try:
                 self.run[namespace].download(tmp_file.name)
@@ -681,6 +699,15 @@ class NeptuneManager:
                 print(Fore.RED+"The checkpoint is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
 
         def fetch_files(self, namespace):
+            """
+            Fetches files from a specified namespace in Neptune.
+
+            Args:
+                namespace (str): The namespace containing the files.
+
+            Returns:
+                list: A list of filenames in the specified namespace.
+            """
             ns = namespace.split("/")
             
             struct = self.run.get_structure()
@@ -690,31 +717,13 @@ class NeptuneManager:
             return list(struct.keys())
         
         def fetch_data(self, namespace):
+            """
+            Fetches data from a specified namespace in Neptune.
+
+            Args:
+                namespace (str): The namespace containing the data.
+
+            Returns:
+                list: A list of fetched data values.
+            """
             return self.run[namespace].fetch_values()
-        
-        
-# nm = NeptuneManager(project_name="Billal-MOKHTARI/Image-Clustering-based-on-Dual-Message-Passing",
-#                     api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI0NGRlOTNiZC0zNGZlLTRjNWUtYWEyMC00NzEwOWJkOTRhODgifQ==",
-#                     run_ids_path="run_ids.json")
-
-
-
-# run = nm.Run(name="IGMP6")
-# namespace = "training/hyperparameters/graph/order"
-# parent_namespace = "/".join(namespace.split("/")[:-2])
-# struct = helpers.sort_string_list(run.fetch_files(parent_namespace))
-# print(struct)
-# data = run.fetch_pkl_data("embeddings")
-# print(data)
-
-# from mrg32k3a.mrg32k3a import MRG32k3a
-# from matplotlib import pyplot as plt
-# from torch.nn import init
-
-
-
-# a = init.kaiming_uniform_(torch.empty(10000, 10000), generator=torch.Generator(device="cpu"))
-# print(a.shape)
-# plt.hist2d(a[0], a[1], bins=200)
-# plt.show()
-
