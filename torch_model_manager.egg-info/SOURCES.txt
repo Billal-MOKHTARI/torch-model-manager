@@ -7,6 +7,7 @@ tests/test_utils/test_helpers.py
 torch_model_manager/__init__.py
 torch_model_manager/neptune_manager.py
 torch_model_manager/torch_model_manager.py
+torch_model_manager/wandb_manager.py
 torch_model_manager.egg-info/PKG-INFO
 torch_model_manager.egg-info/SOURCES.txt
 torch_model_manager.egg-info/dependency_links.txt

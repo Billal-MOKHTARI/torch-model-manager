@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import torch
 from torchvision import transforms
 import json
+import pickle
 
 def required_kernel(in_size: int, out_size:int, stride=1, padding=1):
     assert in_size > 0, "Input size must be greater than 0"
@@ -233,3 +234,43 @@ def sort_string_list(string_list, order='asc'):
                 for text in re.split('([0-9]+)', s)]
 
     return sorted(string_list, key=alphanum_key, reverse=(order == 'desc'))
+
+def load_data_from_path(file_path: str):
+    """
+    Load and deserialize data from a binary file using pickle.
+
+    Parameters:
+    - file_path (str): The path to the file from which data will be loaded.
+
+    Returns:
+    - loaded_data: The deserialized data.
+    """
+    assert isinstance(file_path, str), "file_path must be a string"
+
+    try:
+        # Load the data from the file
+        with open(file_path, 'rb') as file:
+            loaded_data = pickle.load(file)
+    
+
+        return loaded_data
+
+    except (IOError, FileNotFoundError, PermissionError, pickle.PickleError) as e:
+        print(f"Error during load_data_from_path: {e}")
+        return None
+    
+def dump_data(data, file_path: str) -> None:
+    """
+    Serialize and dump the data to a binary file using pickle.
+
+    Parameters:
+    - data: Any Python object to be serialized and saved.
+    - file_path (str): The path to the file where data will be saved.
+    """
+    assert isinstance(file_path, str), "file_path must be a string"
+    try:
+        with open(file_path, 'wb') as file:
+            pickle.dump(data, file)
+
+    except (IOError, FileNotFoundError, PermissionError) as e:
+        print(f"Error during dump_data: {e}")

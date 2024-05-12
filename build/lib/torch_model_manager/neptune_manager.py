@@ -170,6 +170,43 @@ class NeptuneManager:
 
         print(Fore.GREEN+"The tensors are successfully uploaded to Neptune.", Fore.WHITE)
 
+    def log_dataframe(self, 
+                        dataframe: pd.DataFrame, 
+                        namespace: str, 
+                        df_format: bool=True,
+                        csv_format: bool=False, 
+                        profile_report_title: str=None,
+                        profile_report_namespace: str=None,
+                        **kwargs):
+        """
+        Log a dataframe to Neptune.
+
+        Args:
+            dataframe (pd.DataFrame): The dataframe to log.
+            namespace (str): The namespace to log the dataframe.
+            df_format (bool, optional): Whether to log the dataframe in HTML format. Defaults to True.
+            csv_format (bool, optional): Whether to log the dataframe in CSV format. Defaults to False.
+            profile_report_title (str, optional): The title of the profile report. Defaults to None.
+            profile_report_namespace (str, optional): The name of the profile report. Defaults to None.
+        """
+        assert df_format or csv_format, "At least one format should be chosen."
+        to_csv_kwargs = kwargs.get("csv_kwargs", {})
+        profile_report_kwargs = kwargs.get("profile_report_kwargs", {"dark_mode": True})
+        if df_format:
+            NeptuneManager.project[namespace].upload(File.as_html(dataframe))
+        if csv_format:
+            # create the temporary folder if it doesn't exist
+            csv_buffer = StringIO()
+            dataframe.to_csv(csv_buffer, **to_csv_kwargs)
+            NeptuneManager.project[namespace].upload(File.from_stream(csv_buffer, extension="csv"))
+            
+        if profile_report_namespace is not None and profile_report_title is not None:
+            profile = ProfileReport(dataframe, title=profile_report_title, **profile_report_kwargs)
+            
+            NeptuneManager.project[profile_report_namespace].upload(
+                File.from_content(profile.to_html(), extension="html")
+            )
+
     def log_hidden_conv2d(self, 
                           model: nn.Module,
                           input_data: torch.Tensor, 
@@ -401,11 +438,10 @@ class NeptuneManager:
         def log_dataframe(self, 
                           dataframe: pd.DataFrame, 
                           namespace: str, 
-                          df_name: str,
                           df_format: bool=True,
                           csv_format: bool=False, 
                           profile_report_title: str=None,
-                          profile_report_name: str=None,
+                          profile_report_namespace: str=None,
                           **kwargs):
             """
             Log a dataframe to Neptune.
@@ -413,27 +449,26 @@ class NeptuneManager:
             Args:
                 dataframe (pd.DataFrame): The dataframe to log.
                 namespace (str): The namespace to log the dataframe.
-                df_name (str): The name of the dataframe.
                 df_format (bool, optional): Whether to log the dataframe in HTML format. Defaults to True.
                 csv_format (bool, optional): Whether to log the dataframe in CSV format. Defaults to False.
                 profile_report_title (str, optional): The title of the profile report. Defaults to None.
-                profile_report_name (str, optional): The name of the profile report. Defaults to None.
+                profile_report_namespace (str, optional): The name of the profile report. Defaults to None.
             """
             assert df_format or csv_format, "At least one format should be chosen."
             to_csv_kwargs = kwargs.get("csv_kwargs", {})
             profile_report_kwargs = kwargs.get("profile_report_kwargs", {"dark_mode": True})
             if df_format:
-                self.run[namespace][df_name].upload(File.as_html(dataframe))
+                self.run[namespace].upload(File.as_html(dataframe))
             if csv_format:
                 # create the temporary folder if it doesn't exist
                 csv_buffer = StringIO()
                 dataframe.to_csv(csv_buffer, **to_csv_kwargs)
-                self.run[namespace][df_name].upload(File.from_stream(csv_buffer, extension="csv"))
+                self.run[namespace].upload(File.from_stream(csv_buffer, extension="csv"))
                 
-            if profile_report_name is not None and profile_report_title is not None:
+            if profile_report_namespace is not None and profile_report_title is not None:
                 profile = ProfileReport(dataframe, title=profile_report_title, **profile_report_kwargs)
                 
-                self.run[namespace][profile_report_name].upload(
+                self.run[profile_report_namespace].upload(
                     File.from_content(profile.to_html(), extension="html")
                 )
             
@@ -657,7 +692,15 @@ class NeptuneManager:
             return result, row_index, col_index
         
         def fetch_pkl_data(self, namespace: str):
-            
+            """
+            Fetches pickle data from Neptune.
+
+            Args:
+                namespace (str): The namespace where the data is stored.
+
+            Returns:
+                data: The fetched data.
+            """
             tmp_file = tempfile.NamedTemporaryFile(delete=True)
             try :
                 self.run[namespace].download(tmp_file.name)
@@ -671,6 +714,16 @@ class NeptuneManager:
                 print(Fore.RED+"The data is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
 
         def load_model_checkpoint(self, namespace, **kwargs):
+            """
+            Loads a model checkpoint from Neptune.
+
+            Args:
+                namespace (str): The namespace where the checkpoint is stored.
+                **kwargs: Additional keyword arguments for torch.load().
+
+            Returns:
+                state_dict: The loaded model state dictionary.
+            """
             tmp_file = tempfile.NamedTemporaryFile(delete=True)
             try:
                 self.run[namespace].download(tmp_file.name)
@@ -681,6 +734,15 @@ class NeptuneManager:
                 print(Fore.RED+"The checkpoint is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
 
         def fetch_files(self, namespace):
+            """
+            Fetches files from a specified namespace in Neptune.
+
+            Args:
+                namespace (str): The namespace containing the files.
+
+            Returns:
+                list: A list of filenames in the specified namespace.
+            """
             ns = namespace.split("/")
             
             struct = self.run.get_structure()
@@ -690,31 +752,13 @@ class NeptuneManager:
             return list(struct.keys())
         
         def fetch_data(self, namespace):
+            """
+            Fetches data from a specified namespace in Neptune.
+
+            Args:
+                namespace (str): The namespace containing the data.
+
+            Returns:
+                list: A list of fetched data values.
+            """
             return self.run[namespace].fetch_values()
-        
-        
-# nm = NeptuneManager(project_name="Billal-MOKHTARI/Image-Clustering-based-on-Dual-Message-Passing",
-#                     api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI0NGRlOTNiZC0zNGZlLTRjNWUtYWEyMC00NzEwOWJkOTRhODgifQ==",
-#                     run_ids_path="run_ids.json")
-
-
-
-# run = nm.Run(name="IGMP6")
-# namespace = "training/hyperparameters/graph/order"
-# parent_namespace = "/".join(namespace.split("/")[:-2])
-# struct = helpers.sort_string_list(run.fetch_files(parent_namespace))
-# print(struct)
-# data = run.fetch_pkl_data("embeddings")
-# print(data)
-
-# from mrg32k3a.mrg32k3a import MRG32k3a
-# from matplotlib import pyplot as plt
-# from torch.nn import init
-
-
-
-# a = init.kaiming_uniform_(torch.empty(10000, 10000), generator=torch.Generator(device="cpu"))
-# print(a.shape)
-# plt.hist2d(a[0], a[1], bins=200)
-# plt.show()
-

@@ -170,6 +170,43 @@ class NeptuneManager:
 
         print(Fore.GREEN+"The tensors are successfully uploaded to Neptune.", Fore.WHITE)
 
+    def log_dataframe(self, 
+                        dataframe: pd.DataFrame, 
+                        namespace: str, 
+                        df_format: bool=True,
+                        csv_format: bool=False, 
+                        profile_report_title: str=None,
+                        profile_report_namespace: str=None,
+                        **kwargs):
+        """
+        Log a dataframe to Neptune.
+
+        Args:
+            dataframe (pd.DataFrame): The dataframe to log.
+            namespace (str): The namespace to log the dataframe.
+            df_format (bool, optional): Whether to log the dataframe in HTML format. Defaults to True.
+            csv_format (bool, optional): Whether to log the dataframe in CSV format. Defaults to False.
+            profile_report_title (str, optional): The title of the profile report. Defaults to None.
+            profile_report_namespace (str, optional): The name of the profile report. Defaults to None.
+        """
+        assert df_format or csv_format, "At least one format should be chosen."
+        to_csv_kwargs = kwargs.get("csv_kwargs", {})
+        profile_report_kwargs = kwargs.get("profile_report_kwargs", {"dark_mode": True})
+        if df_format:
+            NeptuneManager.project[namespace].upload(File.as_html(dataframe))
+        if csv_format:
+            # create the temporary folder if it doesn't exist
+            csv_buffer = StringIO()
+            dataframe.to_csv(csv_buffer, **to_csv_kwargs)
+            NeptuneManager.project[namespace].upload(File.from_stream(csv_buffer, extension="csv"))
+            
+        if profile_report_namespace is not None and profile_report_title is not None:
+            profile = ProfileReport(dataframe, title=profile_report_title, **profile_report_kwargs)
+            
+            NeptuneManager.project[profile_report_namespace].upload(
+                File.from_content(profile.to_html(), extension="html")
+            )
+
     def log_hidden_conv2d(self, 
                           model: nn.Module,
                           input_data: torch.Tensor, 
@@ -401,11 +438,10 @@ class NeptuneManager:
         def log_dataframe(self, 
                           dataframe: pd.DataFrame, 
                           namespace: str, 
-                          df_name: str,
                           df_format: bool=True,
                           csv_format: bool=False, 
                           profile_report_title: str=None,
-                          profile_report_name: str=None,
+                          profile_report_namespace: str=None,
                           **kwargs):
             """
             Log a dataframe to Neptune.
@@ -413,27 +449,26 @@ class NeptuneManager:
             Args:
                 dataframe (pd.DataFrame): The dataframe to log.
                 namespace (str): The namespace to log the dataframe.
-                df_name (str): The name of the dataframe.
                 df_format (bool, optional): Whether to log the dataframe in HTML format. Defaults to True.
                 csv_format (bool, optional): Whether to log the dataframe in CSV format. Defaults to False.
                 profile_report_title (str, optional): The title of the profile report. Defaults to None.
-                profile_report_name (str, optional): The name of the profile report. Defaults to None.
+                profile_report_namespace (str, optional): The name of the profile report. Defaults to None.
             """
             assert df_format or csv_format, "At least one format should be chosen."
             to_csv_kwargs = kwargs.get("csv_kwargs", {})
             profile_report_kwargs = kwargs.get("profile_report_kwargs", {"dark_mode": True})
             if df_format:
-                self.run[namespace][df_name].upload(File.as_html(dataframe))
+                self.run[namespace].upload(File.as_html(dataframe))
             if csv_format:
                 # create the temporary folder if it doesn't exist
                 csv_buffer = StringIO()
                 dataframe.to_csv(csv_buffer, **to_csv_kwargs)
-                self.run[namespace][df_name].upload(File.from_stream(csv_buffer, extension="csv"))
+                self.run[namespace].upload(File.from_stream(csv_buffer, extension="csv"))
                 
-            if profile_report_name is not None and profile_report_title is not None:
+            if profile_report_namespace is not None and profile_report_title is not None:
                 profile = ProfileReport(dataframe, title=profile_report_title, **profile_report_kwargs)
                 
-                self.run[namespace][profile_report_name].upload(
+                self.run[profile_report_namespace].upload(
                     File.from_content(profile.to_html(), extension="html")
                 )
             
@@ -510,23 +545,15 @@ class NeptuneManager:
             self.run[namespace].upload(File.as_html(figure))
             print(Fore.GREEN+"The figure is successfully uploaded to Neptune.", Fore.WHITE)
         
-        def log_text(self, text, namespace, logger_name, level):
+        def log_text(self, text, namespace):
             """
             Log text.
 
             Args:
                 text: The text to log.
                 namespace (str): The namespace to log the text.
-                logger_name (str): The name of the logger.
-                level (str): The level of the log.
             """
-            assert level in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], "The level should be one of the following: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'"
-            level = eval(f"logging.{level}")
-            logger = logging.getLogger(logger_name)
-            logger.setLevel(level)
-            npt_handler = NeptuneHandler(run=self.run)
-            
-            logger.addHandler(npt_handler)
+
             self.run[namespace].log(text)
             print(Fore.GREEN+"The text is successfully logged to Neptune.", Fore.WHITE)
         

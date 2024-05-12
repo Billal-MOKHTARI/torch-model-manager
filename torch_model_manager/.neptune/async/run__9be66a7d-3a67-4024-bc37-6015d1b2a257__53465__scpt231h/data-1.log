@@ -1,6 +1,0 @@
-{"obj": {"type": "AssignString", "path": ["monitoring", "046f15f8", "hostname"], "value": "pop-os"}, "version": 1, "at": 1714246618.2144456}
-{"obj": {"type": "AssignString", "path": ["monitoring", "046f15f8", "pid"], "value": "53465"}, "version": 2, "at": 1714246618.2147474}
-{"obj": {"type": "AssignString", "path": ["monitoring", "046f15f8", "tid"], "value": "135746214765632"}, "version": 3, "at": 1714246618.214939}
-{"obj": {"type": "ClearStringLog", "path": ["monitoring", "046f15f8", "stdout"]}, "version": 4, "at": 1714246618.2151127}
-{"obj": {"type": "ClearStringLog", "path": ["monitoring", "046f15f8", "stderr"]}, "version": 5, "at": 1714246618.2152557}
-{"obj": {"type": "UploadFile", "path": ["source_code", "diff"], "ext": "patch", "file_path": null, "tmp_file_name": "source_code_diff-1714246618.294046-2024-04-27_21.36.58.294046.patch", "clean_after_upload": false}, "version": 6, "at": 1714246618.29426}

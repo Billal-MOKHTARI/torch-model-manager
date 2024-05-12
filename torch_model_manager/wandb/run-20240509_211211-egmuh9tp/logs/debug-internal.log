@@ -1,0 +1,198 @@
+2024-05-09 21:12:11,286 INFO    StreamThr :23018 [internal.py:wandb_internal():86] W&B internal server running at pid: 23018, started at: 2024-05-09 21:12:11.285991
+2024-05-09 21:12:11,288 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: status
+2024-05-09 21:12:11,296 INFO    WriterThread:23018 [datastore.py:open_for_write():87] open: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/run-egmuh9tp.wandb
+2024-05-09 21:12:11,297 DEBUG   SenderThread:23018 [sender.py:send():379] send: header
+2024-05-09 21:12:11,344 DEBUG   SenderThread:23018 [sender.py:send():379] send: run
+2024-05-09 21:12:11,765 INFO    SenderThread:23018 [dir_watcher.py:__init__():211] watching files in: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files
+2024-05-09 21:12:11,765 INFO    SenderThread:23018 [sender.py:_start_run_threads():1124] run started: egmuh9tp with start time 1715281931.294448
+2024-05-09 21:12:11,770 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: check_version
+2024-05-09 21:12:11,770 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: check_version
+2024-05-09 21:12:11,913 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: run_start
+2024-05-09 21:12:11,934 DEBUG   HandlerThread:23018 [system_info.py:__init__():26] System info init
+2024-05-09 21:12:11,934 DEBUG   HandlerThread:23018 [system_info.py:__init__():41] System info init done
+2024-05-09 21:12:11,934 INFO    HandlerThread:23018 [system_monitor.py:start():194] Starting system monitor
+2024-05-09 21:12:11,934 INFO    SystemMonitor:23018 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-05-09 21:12:11,934 INFO    HandlerThread:23018 [system_monitor.py:probe():214] Collecting system info
+2024-05-09 21:12:11,935 INFO    SystemMonitor:23018 [interfaces.py:start():190] Started cpu monitoring
+2024-05-09 21:12:11,936 INFO    SystemMonitor:23018 [interfaces.py:start():190] Started disk monitoring
+2024-05-09 21:12:11,936 INFO    SystemMonitor:23018 [interfaces.py:start():190] Started memory monitoring
+2024-05-09 21:12:11,937 INFO    SystemMonitor:23018 [interfaces.py:start():190] Started network monitoring
+2024-05-09 21:12:11,943 DEBUG   HandlerThread:23018 [system_info.py:probe():150] Probing system
+2024-05-09 21:12:11,945 DEBUG   HandlerThread:23018 [system_info.py:_probe_git():135] Probing git
+2024-05-09 21:12:11,952 DEBUG   HandlerThread:23018 [system_info.py:_probe_git():143] Probing git done
+2024-05-09 21:12:11,952 DEBUG   HandlerThread:23018 [system_info.py:probe():198] Probing system done
+2024-05-09 21:12:11,952 DEBUG   HandlerThread:23018 [system_monitor.py:probe():223] {'os': 'Linux-6.8.0-76060800daily20240311-generic-x86_64-with-glibc2.35', 'python': '3.11.7', 'heartbeatAt': '2024-05-09T19:12:11.943646', 'startedAt': '2024-05-09T19:12:11.260112', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '/home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb_manager.py', 'codePathLocal': 'wandb_manager.py', 'codePath': 'torch_model_manager/wandb_manager.py', 'git': {'remote': 'https://github.com/Billal-MOKHTARI/torch-model-manager.git', 'commit': '35d70926b8a2df013c5489239eeaea7cdae707d1'}, 'email': 'Billal.MOKHTARI@etu.uca.fr', 'root': '/home/billalmokhtari/Documents/projects/torch-model-manager', 'host': 'pop-os', 'username': 'billalmokhtari', 'executable': '/home/billalmokhtari/anaconda3/bin/python', 'cpu_count': 2, 'cpu_count_logical': 4, 'cpu_freq': {'current': 2.2125000000000004, 'min': 500.0, 'max': 2700.0}, 'cpu_freq_per_core': [{'current': 2.44, 'min': 500.0, 'max': 2700.0}, {'current': 2.435, 'min': 500.0, 'max': 2700.0}, {'current': 2.483, 'min': 500.0, 'max': 2700.0}, {'current': 2.482, 'min': 500.0, 'max': 2700.0}], 'disk': {'/': {'total': 182.10748291015625, 'used': 107.14984512329102}}, 'memory': {'total': 7.664981842041016}}
+2024-05-09 21:12:11,952 INFO    HandlerThread:23018 [system_monitor.py:probe():224] Finished collecting system info
+2024-05-09 21:12:11,952 INFO    HandlerThread:23018 [system_monitor.py:probe():227] Publishing system info
+2024-05-09 21:12:11,952 DEBUG   HandlerThread:23018 [system_info.py:_save_conda():207] Saving list of conda packages installed into the current environment
+2024-05-09 21:12:12,767 INFO    Thread-12 :23018 [dir_watcher.py:_on_file_created():271] file/dir created: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/conda-environment.yaml
+2024-05-09 21:12:26,969 ERROR   HandlerThread:23018 [system_info.py:_save_conda():221] Error saving conda packages: Command '['conda', 'env', 'export']' timed out after 15 seconds
+Traceback (most recent call last):
+  File "/home/billalmokhtari/anaconda3/lib/python3.11/site-packages/wandb/sdk/internal/system/system_info.py", line 214, in _save_conda
+    subprocess.call(
+  File "/home/billalmokhtari/anaconda3/lib/python3.11/subprocess.py", line 391, in call
+    return p.wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/billalmokhtari/anaconda3/lib/python3.11/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/billalmokhtari/anaconda3/lib/python3.11/subprocess.py", line 2038, in _wait
+    raise TimeoutExpired(self.args, timeout)
+subprocess.TimeoutExpired: Command '['conda', 'env', 'export']' timed out after 15 seconds
+2024-05-09 21:12:27,047 DEBUG   HandlerThread:23018 [system_info.py:_save_conda():222] Saving conda packages done
+2024-05-09 21:12:27,047 INFO    HandlerThread:23018 [system_monitor.py:probe():229] Finished publishing system info
+2024-05-09 21:12:27,107 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: status_report
+2024-05-09 21:12:27,107 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: keepalive
+2024-05-09 21:12:27,107 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: status_report
+2024-05-09 21:12:27,107 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: keepalive
+2024-05-09 21:12:27,107 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: status_report
+2024-05-09 21:12:27,107 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: keepalive
+2024-05-09 21:12:27,108 DEBUG   SenderThread:23018 [sender.py:send():379] send: files
+2024-05-09 21:12:27,108 INFO    SenderThread:23018 [sender.py:_save_file():1390] saving file wandb-metadata.json with policy now
+2024-05-09 21:12:27,731 INFO    wandb-upload_0:23018 [upload_job.py:push():131] Uploaded file /tmp/tmpuc2gigubwandb/i7g5ikmr-wandb-metadata.json
+2024-05-09 21:12:27,769 INFO    Thread-12 :23018 [dir_watcher.py:_on_file_created():271] file/dir created: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/wandb-metadata.json
+2024-05-09 21:12:28,901 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: python_packages
+2024-05-09 21:12:28,901 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: python_packages
+2024-05-09 21:12:28,902 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-09 21:12:28,903 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: stop_status
+2024-05-09 21:12:28,905 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-09 21:12:29,164 DEBUG   SenderThread:23018 [sender.py:send():379] send: telemetry
+2024-05-09 21:12:29,165 DEBUG   SenderThread:23018 [sender.py:send():379] send: exit
+2024-05-09 21:12:29,165 INFO    SenderThread:23018 [sender.py:send_exit():586] handling exit code: 0
+2024-05-09 21:12:29,165 INFO    SenderThread:23018 [sender.py:send_exit():588] handling runtime: 16
+2024-05-09 21:12:29,167 INFO    SenderThread:23018 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-09 21:12:29,167 INFO    SenderThread:23018 [sender.py:send_exit():594] send defer
+2024-05-09 21:12:29,167 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:29,168 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 0
+2024-05-09 21:12:29,168 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:29,168 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 0
+2024-05-09 21:12:29,168 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 1
+2024-05-09 21:12:29,168 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:29,168 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 1
+2024-05-09 21:12:29,168 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:29,168 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 1
+2024-05-09 21:12:29,168 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 2
+2024-05-09 21:12:29,169 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:29,169 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 2
+2024-05-09 21:12:29,169 INFO    HandlerThread:23018 [system_monitor.py:finish():203] Stopping system monitor
+2024-05-09 21:12:29,169 DEBUG   SystemMonitor:23018 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-05-09 21:12:29,169 DEBUG   SystemMonitor:23018 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2024-05-09 21:12:29,169 DEBUG   SystemMonitor:23018 [system_monitor.py:_start():183] Publishing last batch of metrics
+2024-05-09 21:12:29,169 INFO    HandlerThread:23018 [interfaces.py:finish():202] Joined cpu monitor
+2024-05-09 21:12:29,170 INFO    HandlerThread:23018 [interfaces.py:finish():202] Joined disk monitor
+2024-05-09 21:12:29,170 INFO    HandlerThread:23018 [interfaces.py:finish():202] Joined memory monitor
+2024-05-09 21:12:29,170 INFO    HandlerThread:23018 [interfaces.py:finish():202] Joined network monitor
+2024-05-09 21:12:29,170 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:29,170 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 2
+2024-05-09 21:12:29,171 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 3
+2024-05-09 21:12:29,171 DEBUG   SenderThread:23018 [sender.py:send():379] send: stats
+2024-05-09 21:12:29,171 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:29,171 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 3
+2024-05-09 21:12:29,172 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:29,172 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 3
+2024-05-09 21:12:29,172 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 4
+2024-05-09 21:12:29,172 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:29,172 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 4
+2024-05-09 21:12:29,173 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:29,173 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 4
+2024-05-09 21:12:29,173 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 5
+2024-05-09 21:12:29,173 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:29,173 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 5
+2024-05-09 21:12:29,173 DEBUG   SenderThread:23018 [sender.py:send():379] send: summary
+2024-05-09 21:12:29,174 INFO    SenderThread:23018 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-09 21:12:29,174 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:29,174 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 5
+2024-05-09 21:12:29,174 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 6
+2024-05-09 21:12:29,174 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:29,175 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 6
+2024-05-09 21:12:29,175 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:29,175 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 6
+2024-05-09 21:12:29,178 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: status_report
+2024-05-09 21:12:29,373 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 7
+2024-05-09 21:12:29,373 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:29,373 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 7
+2024-05-09 21:12:29,373 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:29,373 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 7
+2024-05-09 21:12:29,373 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 8
+2024-05-09 21:12:29,373 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:29,373 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 8
+2024-05-09 21:12:29,374 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:29,374 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 8
+2024-05-09 21:12:29,374 INFO    SenderThread:23018 [job_builder.py:build():318] Attempting to build job artifact
+2024-05-09 21:12:29,374 INFO    SenderThread:23018 [job_builder.py:_get_source_type():455] is repo sourced job
+2024-05-09 21:12:29,437 INFO    SenderThread:23018 [job_builder.py:build():431] adding wandb-job metadata file
+2024-05-09 21:12:29,586 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 9
+2024-05-09 21:12:29,587 DEBUG   SenderThread:23018 [sender.py:send():379] send: artifact
+2024-05-09 21:12:29,589 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:29,589 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 9
+2024-05-09 21:12:29,770 INFO    Thread-12 :23018 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/config.yaml
+2024-05-09 21:12:29,770 INFO    Thread-12 :23018 [dir_watcher.py:_on_file_created():271] file/dir created: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/wandb-summary.json
+2024-05-09 21:12:29,770 INFO    Thread-12 :23018 [dir_watcher.py:_on_file_created():271] file/dir created: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/requirements.txt
+2024-05-09 21:12:29,907 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-09 21:12:30,843 INFO    wandb-upload_1:23018 [upload_job.py:push():89] Uploaded file /tmp/tmpbcpql1km/wandb-job.json
+2024-05-09 21:12:30,858 INFO    wandb-upload_0:23018 [upload_job.py:push():89] Uploaded file /home/billalmokhtari/.local/share/wandb/artifacts/staging/tmpscc400ic
+2024-05-09 21:12:31,783 INFO    SenderThread:23018 [sender.py:send_artifact():1468] sent artifact job-https___github.com_Billal-MOKHTARI_torch-model-manager.git_torch_model_manager_wandb_manager.py - {'id': 'QXJ0aWZhY3Q6ODI5MzE2ODc4', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjE3MjY2ODA2NA==', 'latestArtifact': None}}
+2024-05-09 21:12:31,783 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:31,783 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 9
+2024-05-09 21:12:31,783 INFO    SenderThread:23018 [dir_watcher.py:finish():358] shutting down directory watcher
+2024-05-09 21:12:32,772 INFO    SenderThread:23018 [dir_watcher.py:finish():388] scan: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files
+2024-05-09 21:12:32,772 INFO    SenderThread:23018 [dir_watcher.py:finish():402] scan save: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/config.yaml config.yaml
+2024-05-09 21:12:32,773 INFO    SenderThread:23018 [dir_watcher.py:finish():402] scan save: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/wandb-summary.json wandb-summary.json
+2024-05-09 21:12:32,776 INFO    SenderThread:23018 [dir_watcher.py:finish():402] scan save: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/conda-environment.yaml conda-environment.yaml
+2024-05-09 21:12:32,776 INFO    SenderThread:23018 [dir_watcher.py:finish():402] scan save: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/requirements.txt requirements.txt
+2024-05-09 21:12:32,776 INFO    SenderThread:23018 [dir_watcher.py:finish():402] scan save: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/wandb-metadata.json wandb-metadata.json
+2024-05-09 21:12:32,777 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 10
+2024-05-09 21:12:32,777 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: poll_exit
+2024-05-09 21:12:32,777 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:32,777 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 10
+2024-05-09 21:12:32,784 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:32,785 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 10
+2024-05-09 21:12:32,785 INFO    SenderThread:23018 [file_pusher.py:finish():172] shutting down file pusher
+2024-05-09 21:12:32,908 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-09 21:12:32,908 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: poll_exit
+2024-05-09 21:12:33,183 INFO    wandb-upload_1:23018 [upload_job.py:push():131] Uploaded file /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/config.yaml
+2024-05-09 21:12:33,223 INFO    wandb-upload_0:23018 [upload_job.py:push():131] Uploaded file /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/wandb-summary.json
+2024-05-09 21:12:33,354 INFO    wandb-upload_2:23018 [upload_job.py:push():131] Uploaded file /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/files/requirements.txt
+2024-05-09 21:12:33,554 INFO    Thread-11 (_thread_body):23018 [sender.py:transition_state():614] send defer: 11
+2024-05-09 21:12:33,555 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:33,555 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 11
+2024-05-09 21:12:33,555 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:33,555 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 11
+2024-05-09 21:12:33,555 INFO    SenderThread:23018 [file_pusher.py:join():178] waiting for file pusher
+2024-05-09 21:12:33,555 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 12
+2024-05-09 21:12:33,555 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:33,555 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 12
+2024-05-09 21:12:33,556 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:33,556 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 12
+2024-05-09 21:12:33,556 INFO    SenderThread:23018 [file_stream.py:finish():614] file stream finish called
+2024-05-09 21:12:33,710 INFO    SenderThread:23018 [file_stream.py:finish():618] file stream finish is done
+2024-05-09 21:12:33,711 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 13
+2024-05-09 21:12:33,711 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:33,711 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 13
+2024-05-09 21:12:33,711 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:33,711 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 13
+2024-05-09 21:12:33,711 INFO    SenderThread:23018 [sender.py:transition_state():614] send defer: 14
+2024-05-09 21:12:33,711 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: defer
+2024-05-09 21:12:33,711 INFO    HandlerThread:23018 [handler.py:handle_request_defer():172] handle defer: 14
+2024-05-09 21:12:33,712 DEBUG   SenderThread:23018 [sender.py:send():379] send: final
+2024-05-09 21:12:33,712 DEBUG   SenderThread:23018 [sender.py:send():379] send: footer
+2024-05-09 21:12:33,712 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: defer
+2024-05-09 21:12:33,712 INFO    SenderThread:23018 [sender.py:send_request_defer():610] handle sender defer: 14
+2024-05-09 21:12:33,712 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-09 21:12:33,713 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-09 21:12:33,713 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: poll_exit
+2024-05-09 21:12:33,713 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: poll_exit
+2024-05-09 21:12:33,714 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: server_info
+2024-05-09 21:12:33,714 DEBUG   SenderThread:23018 [sender.py:send_request():406] send_request: server_info
+2024-05-09 21:12:33,716 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: get_summary
+2024-05-09 21:12:33,717 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: sampled_history
+2024-05-09 21:12:33,717 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-09 21:12:33,853 INFO    MainThread:23018 [wandb_run.py:_footer_history_summary_info():3936] rendering history
+2024-05-09 21:12:33,853 INFO    MainThread:23018 [wandb_run.py:_footer_history_summary_info():3968] rendering summary
+2024-05-09 21:12:33,853 INFO    MainThread:23018 [wandb_run.py:_footer_sync_info():3895] logging synced files
+2024-05-09 21:12:33,853 DEBUG   HandlerThread:23018 [handler.py:handle_request():146] handle_request: shutdown
+2024-05-09 21:12:33,853 INFO    HandlerThread:23018 [handler.py:finish():866] shutting down handler
+2024-05-09 21:12:34,714 INFO    WriterThread:23018 [datastore.py:close():296] close: /home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb/run-20240509_211211-egmuh9tp/run-egmuh9tp.wandb
+2024-05-09 21:12:34,853 INFO    SenderThread:23018 [sender.py:finish():1546] shutting down sender
+2024-05-09 21:12:34,853 INFO    SenderThread:23018 [file_pusher.py:finish():172] shutting down file pusher
+2024-05-09 21:12:34,853 INFO    SenderThread:23018 [file_pusher.py:join():178] waiting for file pusher

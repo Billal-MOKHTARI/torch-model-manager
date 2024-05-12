@@ -1,0 +1,60 @@
+{
+    "os": "Linux-6.8.0-76060800daily20240311-generic-x86_64-with-glibc2.35",
+    "python": "3.11.7",
+    "heartbeatAt": "2024-05-09T19:12:11.943646",
+    "startedAt": "2024-05-09T19:12:11.260112",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/billalmokhtari/Documents/projects/torch-model-manager/torch_model_manager/wandb_manager.py",
+    "codePathLocal": "wandb_manager.py",
+    "codePath": "torch_model_manager/wandb_manager.py",
+    "git": {
+        "remote": "https://github.com/Billal-MOKHTARI/torch-model-manager.git",
+        "commit": "35d70926b8a2df013c5489239eeaea7cdae707d1"
+    },
+    "email": "Billal.MOKHTARI@etu.uca.fr",
+    "root": "/home/billalmokhtari/Documents/projects/torch-model-manager",
+    "host": "pop-os",
+    "username": "billalmokhtari",
+    "executable": "/home/billalmokhtari/anaconda3/bin/python",
+    "cpu_count": 2,
+    "cpu_count_logical": 4,
+    "cpu_freq": {
+        "current": 2.2125000000000004,
+        "min": 500.0,
+        "max": 2700.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2.44,
+            "min": 500.0,
+            "max": 2700.0
+        },
+        {
+            "current": 2.435,
+            "min": 500.0,
+            "max": 2700.0
+        },
+        {
+            "current": 2.483,
+            "min": 500.0,
+            "max": 2700.0
+        },
+        {
+            "current": 2.482,
+            "min": 500.0,
+            "max": 2700.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 182.10748291015625,
+            "used": 107.14984512329102
+        }
+    },
+    "memory": {
+        "total": 7.664981842041016
+    }
+}
