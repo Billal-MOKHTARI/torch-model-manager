@@ -1,11 +1,23 @@
 from setuptools import setup, find_packages
+from setuptools.command.install import install
+import os
+import subprocess
+
+
+class CustomInstallCommand(install):
+    """Customized setuptools install command - prints a friendly greeting."""
+    def run(self):
+        subprocess.run(["bash", "init.sh"])
+        install.run(self)
+
+
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
     name='torch-model-manager',
-    version='0.2.0.dev20',
+    version='0.3.0.dev10',
     description='A package for managing PyTorch models',
     author='Billal MOKHTARI',
     author_email='mokhtaribillal1@gmail.com',
@@ -27,9 +39,15 @@ setup(
         'torch',
         'numpy',
         'torchvision',
-        'torch',
+        'neptune',
+        'torchviz',
         'torchcam',
-        'neptune'
+        'colorama',
+        'neptune_pytorch',
+        'torchview',
+        'graphviz',
+        'wandb',
+        'ydata_profiling'
         # Add any other dependencies here
     ],
     classifiers=[
@@ -37,5 +55,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Operating System :: OS Independent',
     ],
-
+    cmdclass={
+        'install dependencies': CustomInstallCommand,
+    },
 )

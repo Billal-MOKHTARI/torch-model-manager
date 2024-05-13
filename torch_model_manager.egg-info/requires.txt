@@ -1,6 +1,12 @@
 torch
 numpy
 torchvision
-torch
-torchcam
 neptune
+torchviz
+torchcam
+colorama
+neptune_pytorch
+torchview
+graphviz
+wandb
+ydata_profiling

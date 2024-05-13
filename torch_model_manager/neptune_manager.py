@@ -15,7 +15,6 @@ from torch import nn
 from io import StringIO
 from ydata_profiling import ProfileReport
 from neptune.integrations.python_logger import NeptuneHandler
-import logging
 from torchviz import make_dot
 from torchcam.methods import LayerCAM, GradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISCAM, XGradCAM 
 import sys
@@ -25,8 +24,6 @@ import torch_model_manager as tmm
 from torchcam.utils import overlay_mask
 import pickle
 import tempfile
-
-
 class NeptuneManager:
     """
     A class for managing Neptune projects and runs.
@@ -316,6 +313,19 @@ class NeptuneManager:
             
         except:
             print(Fore.RED+"The data is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
+
+    def fetch_csv_data(self, namespace: str, **kwargs):        
+        tmp_file = tempfile.NamedTemporaryFile(delete=True)
+        try :
+            NeptuneManager.project[namespace].download(tmp_file.name)
+
+            data = pd.read_csv(tmp_file.name, **kwargs)
+            print(Fore.GREEN+"The data is successfully fetched from Neptune.", Fore.WHITE)
+            return data
+            
+        except:
+            print(Fore.RED+"The data is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
+
 
     class Run:
         """
@@ -704,6 +714,19 @@ class NeptuneManager:
                 
             except:
                 print(Fore.RED+"The data is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
+
+        def fetch_csv_data(self, namespace: str, **kwargs):        
+            tmp_file = tempfile.NamedTemporaryFile(delete=True)
+            try :
+                self.run.project[namespace].download(tmp_file.name)
+
+                data = pd.read_csv(tmp_file.name, **kwargs)
+                print(Fore.GREEN+"The data is successfully fetched from Neptune.", Fore.WHITE)
+                return data
+                
+            except:
+                print(Fore.RED+"The data is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
+
 
         def load_model_checkpoint(self, namespace, **kwargs):
             """

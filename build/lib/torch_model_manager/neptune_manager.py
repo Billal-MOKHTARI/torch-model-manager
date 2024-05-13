@@ -15,7 +15,6 @@ from torch import nn
 from io import StringIO
 from ydata_profiling import ProfileReport
 from neptune.integrations.python_logger import NeptuneHandler
-import logging
 from torchviz import make_dot
 from torchcam.methods import LayerCAM, GradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISCAM, XGradCAM 
 import sys
@@ -25,8 +24,6 @@ import torch_model_manager as tmm
 from torchcam.utils import overlay_mask
 import pickle
 import tempfile
-
-
 class NeptuneManager:
     """
     A class for managing Neptune projects and runs.
@@ -317,6 +314,19 @@ class NeptuneManager:
         except:
             print(Fore.RED+"The data is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
 
+    def fetch_csv_data(self, namespace: str, **kwargs):        
+        tmp_file = tempfile.NamedTemporaryFile(delete=True)
+        try :
+            NeptuneManager.project[namespace].download(tmp_file.name)
+
+            data = pd.read_csv(tmp_file.name, **kwargs)
+            print(Fore.GREEN+"The data is successfully fetched from Neptune.", Fore.WHITE)
+            return data
+            
+        except:
+            print(Fore.RED+"The data is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
+
+
     class Run:
         """
         A class representing a Neptune run.
@@ -545,23 +555,15 @@ class NeptuneManager:
             self.run[namespace].upload(File.as_html(figure))
             print(Fore.GREEN+"The figure is successfully uploaded to Neptune.", Fore.WHITE)
         
-        def log_text(self, text, namespace, logger_name, level):
+        def log_text(self, text, namespace):
             """
             Log text.
 
             Args:
                 text: The text to log.
                 namespace (str): The namespace to log the text.
-                logger_name (str): The name of the logger.
-                level (str): The level of the log.
             """
-            assert level in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], "The level should be one of the following: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'"
-            level = eval(f"logging.{level}")
-            logger = logging.getLogger(logger_name)
-            logger.setLevel(level)
-            npt_handler = NeptuneHandler(run=self.run)
-            
-            logger.addHandler(npt_handler)
+
             self.run[namespace].log(text)
             print(Fore.GREEN+"The text is successfully logged to Neptune.", Fore.WHITE)
         
@@ -712,6 +714,19 @@ class NeptuneManager:
                 
             except:
                 print(Fore.RED+"The data is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
+
+        def fetch_csv_data(self, namespace: str, **kwargs):        
+            tmp_file = tempfile.NamedTemporaryFile(delete=True)
+            try :
+                self.run.project[namespace].download(tmp_file.name)
+
+                data = pd.read_csv(tmp_file.name, **kwargs)
+                print(Fore.GREEN+"The data is successfully fetched from Neptune.", Fore.WHITE)
+                return data
+                
+            except:
+                print(Fore.RED+"The data is not fetched from Neptune. Please check the namespace."+Fore.WHITE)
+
 
         def load_model_checkpoint(self, namespace, **kwargs):
             """
