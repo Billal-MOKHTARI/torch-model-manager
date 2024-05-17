@@ -20,7 +20,7 @@ class SegmentationManager:
         elif sam_backbone == "sam_vit_b":
             sam_checkpoint_path = os.path.join(sam_checkpoint_path, "sam_vit_b_01ec64.pth")
         elif sam_backbone == "sam_vit_l":
-            sam_checkpoint_path = os.path.join(sam_checkpoint_path, "sam_vit_l_0b3195.pth.pth")
+            sam_checkpoint_path = os.path.join(sam_checkpoint_path, "sam_vit_l_0b3195.pth")
 
         if g_dino_backbone == "swin_t":
             g_dino_model_config_path = os.path.join(g_dino_model_config_path, "GroundingDINO_SwinT_OGC.py")
