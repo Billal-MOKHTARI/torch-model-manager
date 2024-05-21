@@ -9,6 +9,7 @@ from groundingdino.util.inference import Model
 from segment_anything import sam_model_registry, SamPredictor
 from scipy.stats import hmean
 import pandas as pd
+from tqdm import tqdm
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -245,7 +246,7 @@ class SegmentationManager:
         # Create an empty annotation matrix
         annotation_matrix = pd.DataFrame(index=image_ids, columns=classes, dtype=float)
 
-        for image_name in image_ids:
+        for image_name in tqdm(image_ids, desc="Creating annotation matrix", unit="image"):
             image_path = os.path.join(dataset_path, image_name)
 
             # Apply the grounding SAM pipeline
@@ -256,7 +257,7 @@ class SegmentationManager:
             class_ids = [classes[id] for id in detections.class_id]
             harmonic_means = self.harmonic_mean(class_ids, confidences)
 
-            annotation_matrix[class_ids] = harmonic_means[:, 1]
+            annotation_matrix[harmonic_means[:, 0]] = harmonic_means[:, 1]
 
         return annotation_matrix
     
@@ -273,4 +274,9 @@ if __name__ == "__main__":
     manager = SegmentationManager()
 
     # Apply the grounding SAM pipeline
-    detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
+    # detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
+
+    # Create an annotation matrix for a dataset
+    dataset_path = "test_dataset"
+    annotation_matrix = manager.create_annotation_matrix(dataset_path, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD)
+    print(annotation_matrix)
