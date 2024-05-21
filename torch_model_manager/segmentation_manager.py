@@ -74,9 +74,62 @@ class SegmentationManager:
             text_threshold=text_threshold
         )
         return detections
+    
+    def iou(self, box1, box2):
+        """
+        Compute the Intersection over Union (IoU) of two bounding boxes.
+
+        Parameters:
+        - box1, box2 (list or np.array): Bounding boxes in the format [x1, y1, x2, y2].
+
+        Returns:
+        - float: IoU of the two bounding boxes.
+        """
+        # Coordinates of the intersection rectangle
+        x1_inter = max(box1[0], box2[0])
+        y1_inter = max(box1[1], box2[1])
+        x2_inter = min(box1[2], box2[2])
+        y2_inter = min(box1[3], box2[3])
+
+        # Compute the area of the intersection rectangle
+        inter_width = max(0, x2_inter - x1_inter + 1)
+        inter_height = max(0, y2_inter - y1_inter + 1)
+        inter_area = inter_width * inter_height
+
+        # Compute the area of both bounding boxes
+        box1_area = (box1[2] - box1[0] + 1) * (box1[3] - box1[1] + 1)
+        box2_area = (box2[2] - box2[0] + 1) * (box2[3] - box2[1] + 1)
+
+        # Compute the IoU by taking the intersection area and dividing it by the union area
+        union_area = box1_area + box2_area - inter_area
+        iou_value = inter_area / union_area
+
+        return iou_value
+
+    def nms(self, detections, nms_threshold=0.5):
+        bboxes = detections.xyxy
+        confidences = detections.confidence
+        class_ids = detections.class_id
+
+        to_drop = []
+        for i, bbox_i in enumerate(bboxes):
+            for j, bbox_j in enumerate(bboxes):
+                if i != j and class_ids[i]==class_ids[j] and self.iou(bbox_i, bbox_j) > nms_threshold:
+                    if confidences[i] > confidences[j]:
+                        to_drop.append(j)
+                    else:
+                        to_drop.append(i)
+
+        to_keep = [i for i in range(len(bboxes)) if i not in to_drop]
+        detections.xyxy = detections.xyxy[to_keep]
+        detections.confidence = detections.confidence[to_keep]
+        detections.class_id = detections.class_id[to_keep]
+
+        return detections
 
     
     def apply_nms(self, detections, nms_threshold=0.8):
+        
         def first_occurrences_indices(lst):
             seen = {}
             indices = []
@@ -93,15 +146,15 @@ class SegmentationManager:
             torch.from_numpy(detections.confidence),
             nms_threshold
         ).numpy().tolist()
-        
+  
         detections.xyxy = detections.xyxy[nms_idx]
         detections.confidence = detections.confidence[nms_idx]
         detections.class_id = detections.class_id[nms_idx]
-        idx = first_occurrences_indices(detections.class_id)
+        # idx = first_occurrences_indices(detections.class_id)
 
-        detections.xyxy = detections.xyxy[idx]
-        detections.confidence = detections.confidence[idx]
-        detections.class_id = detections.class_id[idx]
+        # detections.xyxy = detections.xyxy[idx]
+        # detections.confidence = detections.confidence[idx]
+        # detections.class_id = detections.class_id[idx]
 
         return detections
     
@@ -124,7 +177,7 @@ class SegmentationManager:
         confidences = detections.confidence
         class_ids = detections.class_id
         labels = [f"{classes[class_id]} {confidence:0.2f}" for class_id, confidence in zip(class_ids, confidences)]
-        print(labels)
+
         annotated_image = mask_annotator.annotate(scene=image.copy(), detections=detections)
         annotated_image = box_annotator.annotate(scene=annotated_image, detections=detections, labels=labels)
         return annotated_image
@@ -137,7 +190,7 @@ class SegmentationManager:
         detections = self.detect_objects(image, classes, box_threshold, text_threshold)
 
         # Apply NMS
-        detections = self.apply_nms(detections, nms_threshold)
+        detections = self.nms(detections, nms_threshold)
 
         # Convert detections to masks
         detections.mask = self.segment(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), detections.xyxy)
@@ -154,13 +207,13 @@ class SegmentationManager:
         cv2.imwrite(path, image)
 # Example usage
 if __name__ == "__main__":
-    SOURCE_IMAGE_PATH = "cat.jpg"
-    CLASSES = ["cat", "table", "window"]
-    BOX_THRESHOLD = 0.25
+    SOURCE_IMAGE_PATH = "G0041951.JPG"
+    CLASSES = ["person", "banner", "finger", "hand", "foot", "glasses", "desert", "sky", "clouds"]
+    BOX_THRESHOLD = 0.3
     TEXT_THRESHOLD = 0.25
-    NMS_THRESHOLD = 0.8
+    NMS_THRESHOLD = 0.3
 
     manager = SegmentationManager()
 
     # Apply the grounding SAM pipeline
-    annotated_image, detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
+    detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
