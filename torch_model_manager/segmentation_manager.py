@@ -256,8 +256,7 @@ class SegmentationManager:
             confidences = detections.confidence
             class_ids = [classes[id] for id in detections.class_id]
             harmonic_means = self.harmonic_mean(class_ids, confidences)
-
-            annotation_matrix[harmonic_means[:, 0]] = harmonic_means[:, 1]
+            annotation_matrix[image_name][harmonic_means[:, 0]] = harmonic_means[:, 1]
 
         return annotation_matrix
     
