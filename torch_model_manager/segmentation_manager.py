@@ -7,6 +7,7 @@ import supervision as sv
 
 from groundingdino.util.inference import Model
 from segment_anything import sam_model_registry, SamPredictor
+from scipy.stats import hmean
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -203,6 +204,32 @@ class SegmentationManager:
 
         return detections
     
+    def harmonic_mean_confidences(self, classes, confidences):
+        """
+        Calculate the harmonic mean of confidences for each class.
+
+        Parameters:
+        - classes (np.ndarray): 1D array containing class IDs.
+        - confidences (np.ndarray): 1D array containing confidences.
+
+        Returns:
+        - np.ndarray: 2D array with class_id and their corresponding harmonic means of confidences.
+        """
+        classes = np.array(classes)
+        confidences = np.array(confidences)
+        unique_classes = np.unique(classes)
+        result = []
+
+        for cls in unique_classes:
+            class_confidences = confidences[classes == cls]
+            harmonic_mean_value = hmean(class_confidences)
+            result.append([cls, harmonic_mean_value])
+
+        return np.array(result)
+
+    def create_annotation_matrix(self, dataset_path):
+        pass
+    
     def save_image(self, image, path):
         cv2.imwrite(path, image)
 # Example usage
@@ -217,3 +244,4 @@ if __name__ == "__main__":
 
     # Apply the grounding SAM pipeline
     detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
+    print(manager.harmonic_mean_confidences(detections.class_id, detections.confidence))
