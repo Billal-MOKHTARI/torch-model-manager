@@ -8,6 +8,7 @@ import supervision as sv
 from groundingdino.util.inference import Model
 from segment_anything import sam_model_registry, SamPredictor
 from scipy.stats import hmean
+import pandas as pd
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -204,7 +205,7 @@ class SegmentationManager:
 
         return detections
     
-    def harmonic_mean_confidences(self, classes, confidences):
+    def harmonic_mean(self, classes, confidences):
         """
         Calculate the harmonic mean of confidences for each class.
 
@@ -227,8 +228,37 @@ class SegmentationManager:
 
         return np.array(result)
 
-    def create_annotation_matrix(self, dataset_path):
-        pass
+    def create_annotation_matrix(self, dataset_path, classes, box_threshold, text_threshold, nms_threshold):
+        """
+        Create an annotation matrix for a dataset.
+
+        Parameters:
+        - dataset_path (str): Path to the dataset.
+        - classes (list): List of classes.
+
+        Returns:
+        - np.ndarray: Annotation matrix with shape (num_images, num_classes).
+        """
+        # Import image base paths
+        image_ids = sorted(os.listdir(dataset_path))
+
+        # Create an empty annotation matrix
+        annotation_matrix = pd.DataFrame(index=image_ids, columns=classes, dtype=float)
+
+        for image_name in image_ids:
+            image_path = os.path.join(dataset_path, image_name)
+
+            # Apply the grounding SAM pipeline
+            detections = self.grounding_sam(image_path, classes, box_threshold=box_threshold, text_threshold=text_threshold, nms_threshold=nms_threshold)
+
+            # Calculate the harmonic mean of confidences
+            confidences = detections.confidence
+            class_ids = [classes[id] for id in detections.class_id]
+            harmonic_means = self.harmonic_mean(class_ids, confidences)
+
+            annotation_matrix[class_ids] = harmonic_means[:, 1]
+
+        return annotation_matrix
     
     def save_image(self, image, path):
         cv2.imwrite(path, image)
@@ -244,4 +274,3 @@ if __name__ == "__main__":
 
     # Apply the grounding SAM pipeline
     detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
-    print(manager.harmonic_mean_confidences(detections.class_id, detections.confidence))
