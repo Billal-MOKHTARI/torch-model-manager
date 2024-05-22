@@ -204,11 +204,11 @@ class SegmentationManager:
 
         # Convert detections to masks
         detections.mask = self.segment(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), detections.xyxy)
-        print(detections)
+  
 
         # Annotate image with segmented masks
         annotated_image = self.annotate_image(image, detections, classes)
-        print("---------------------------------------")
+
         if output_path is not None:
             self.save_image(annotated_image, output_path)
 
@@ -337,4 +337,4 @@ if __name__ == "__main__":
                                                           box_threshold=BOX_THRESHOLD, 
                                                           text_threshold=TEXT_THRESHOLD, 
                                                           nms_threshold=NMS_THRESHOLD)
-    print(annotation_matrix)
+
