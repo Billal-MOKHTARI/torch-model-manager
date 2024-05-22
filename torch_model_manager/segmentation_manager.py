@@ -278,9 +278,24 @@ class SegmentationManager:
         Returns:
         - np.ndarray: Occurrence probability disjoint matrix with shape (num_classes, num_classes).
         """
+        dataset_path = kwargs.get("dataset_path", None)
+        classes = kwargs.get("classes", None)
+        box_threshold = kwargs.get("box_threshold", 0.25)
+        text_threshold = kwargs.get("text_threshold", 0.25)
+        nms_threshold = kwargs.get("nms_threshold", 0.8)
+        agg = kwargs.get("agg", hmean)
+        annotation_matrix_processing = kwargs.get("annotation_matrix_processing", None)
+        annotation_matrix_processing_args = kwargs.get("annotation_matrix_processing_args", {})
         if apply_on_annotation_matrix:
             assert matrix is None, "Annotation matrix should not be provided."
-            matrix = self.create_annotation_matrix(**kwargs)
+            matrix = self.create_annotation_matrix(dataset_path=dataset_path, 
+                                                   classes=classes, 
+                                                   box_threshold=box_threshold, 
+                                                   text_threshold=text_threshold,
+                                                   nms_threshold=nms_threshold, 
+                                                   agg=agg)
+        if annotation_matrix_processing is not None:
+            matrix = annotation_matrix_processing(matrix, **annotation_matrix_processing_args)
 
         classes = matrix.columns
         num_rows, num_cols = matrix.shape
@@ -300,26 +315,27 @@ class SegmentationManager:
     
     def save_image(self, image, path):
         cv2.imwrite(path, image)
-# Example usage
-if __name__ == "__main__":
-    SOURCE_IMAGE_PATH = "G0041951.JPG"
-    CLASSES = ["person", "banner", "finger", "hand", "foot", "glasses", "desert", "sky", "clouds"]
-    BOX_THRESHOLD = 0.3
-    TEXT_THRESHOLD = 0.25
-    NMS_THRESHOLD = 0.3
+        
+# # Example usage
+# if __name__ == "__main__":
+#     SOURCE_IMAGE_PATH = "G0041951.JPG"
+#     CLASSES = ["person", "banner", "finger", "hand", "foot", "glasses", "desert", "sky", "clouds"]
+#     BOX_THRESHOLD = 0.3
+#     TEXT_THRESHOLD = 0.25
+#     NMS_THRESHOLD = 0.3
 
-    manager = SegmentationManager()
+#     manager = SegmentationManager()
 
-    # Apply the grounding SAM pipeline
-    # detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
+#     # Apply the grounding SAM pipeline
+#     # detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
 
-    # Create an annotation matrix for a dataset
-    dataset_path = "test_dataset"
-    annotation_matrix = manager.occ_proba_disjoint_tensor(matrix = None, 
-                                                          apply_on_annotation_matrix=True, 
-                                                          dataset_path=dataset_path, 
-                                                          classes=CLASSES, 
-                                                          box_threshold=BOX_THRESHOLD, 
-                                                          text_threshold=TEXT_THRESHOLD, 
-                                                          nms_threshold=NMS_THRESHOLD)
-    print(annotation_matrix)
+#     # Create an annotation matrix for a dataset
+#     dataset_path = "test_dataset"
+#     annotation_matrix = manager.occ_proba_disjoint_tensor(matrix = None, 
+#                                                           apply_on_annotation_matrix=True, 
+#                                                           dataset_path=dataset_path, 
+#                                                           classes=CLASSES, 
+#                                                           box_threshold=BOX_THRESHOLD, 
+#                                                           text_threshold=TEXT_THRESHOLD, 
+#                                                           nms_threshold=NMS_THRESHOLD)
+#     print(annotation_matrix)
