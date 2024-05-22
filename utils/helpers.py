@@ -4,6 +4,7 @@ import torch
 from torchvision import transforms
 import json
 import pickle
+import os
 
 def required_kernel(in_size: int, out_size:int, stride=1, padding=1):
     assert in_size > 0, "Input size must be greater than 0"
@@ -274,3 +275,20 @@ def dump_data(data, file_path: str) -> None:
 
     except (IOError, FileNotFoundError, PermissionError) as e:
         print(f"Error during dump_data: {e}")
+
+def create_hierarchy(path):
+    """
+    Create a hierarchy of directories from a given path.
+
+    Args:
+        path (str): The path to create the hierarchy of directories.
+
+    Returns:
+        None
+    """
+    try:
+        os.makedirs(path)
+    except FileExistsError:
+        print(f"Directory {path} already exists.")
+    except Exception as e:
+        print(f"Error during create_hierarchy: {e}")

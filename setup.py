@@ -17,7 +17,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='torch-model-manager',
-    version='0.3.0.dev10',
+    version='0.4.0.dev4',
     description='A package for managing PyTorch models',
     author='Billal MOKHTARI',
     author_email='mokhtaribillal1@gmail.com',
@@ -47,7 +47,19 @@ setup(
         'torchview',
         'graphviz',
         'wandb',
-        'ydata_profiling'
+        'ydata_profiling',
+        'diffusers',
+        'transformers',
+        'accelerate',
+        'scipy',
+        'safetensors',
+        'supervision',
+        'tqdm',
+        'pycocotools',
+        'opencv-python',
+        'addict',
+        'yapf',
+        'timm'
         # Add any other dependencies here
     ],
     classifiers=[

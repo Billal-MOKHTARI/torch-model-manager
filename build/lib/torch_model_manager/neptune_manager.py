@@ -384,6 +384,7 @@ class NeptuneManager:
                     # Retrieve the id of the run and store it in the file with its associated name
                     self.run_id = self.run["sys/id"].fetch()
                     helpers.add_to_json_file(NeptuneManager.run_ids_path, self.name, self.run_id)
+                    
             except:
                 print(Fore.RED+"The JSON file is not found. Please check the path."+Fore.WHITE)
             
