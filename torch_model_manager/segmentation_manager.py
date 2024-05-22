@@ -199,16 +199,16 @@ class SegmentationManager:
 
         # Detect objects
         detections = self.detect_objects(image, classes, box_threshold, text_threshold)
-
         # Apply NMS
         detections = self.nms(detections, nms_threshold)
 
         # Convert detections to masks
         detections.mask = self.segment(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), detections.xyxy)
+        print(detections)
 
         # Annotate image with segmented masks
         annotated_image = self.annotate_image(image, detections, classes)
-
+        print("---------------------------------------")
         if output_path is not None:
             self.save_image(annotated_image, output_path)
 
@@ -259,7 +259,6 @@ class SegmentationManager:
 
             # Apply the grounding SAM pipeline
             detections = self.grounding_sam(image_path, classes, box_threshold=box_threshold, text_threshold=text_threshold, nms_threshold=nms_threshold)
-
             # Calculate the harmonic mean of confidences
             confidences = detections.confidence
             class_ids = [classes[id] for id in detections.class_id]
@@ -317,25 +316,25 @@ class SegmentationManager:
         cv2.imwrite(path, image)
         
 # # Example usage
-# if __name__ == "__main__":
-#     SOURCE_IMAGE_PATH = "G0041951.JPG"
-#     CLASSES = ["person", "banner", "finger", "hand", "foot", "glasses", "desert", "sky", "clouds"]
-#     BOX_THRESHOLD = 0.3
-#     TEXT_THRESHOLD = 0.25
-#     NMS_THRESHOLD = 0.3
+if __name__ == "__main__":
+    SOURCE_IMAGE_PATH = "G0041951.JPG"
+    CLASSES = ["person", "banner", "finger", "hand", "foot", "glasses", "desert", "sky", "clouds"]
+    BOX_THRESHOLD = 0.3
+    TEXT_THRESHOLD = 0.25
+    NMS_THRESHOLD = 0.3
 
-#     manager = SegmentationManager()
+    manager = SegmentationManager()
 
-#     # Apply the grounding SAM pipeline
-#     # detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
+    # Apply the grounding SAM pipeline
+    # detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
 
-#     # Create an annotation matrix for a dataset
-#     dataset_path = "test_dataset"
-#     annotation_matrix = manager.occ_proba_disjoint_tensor(matrix = None, 
-#                                                           apply_on_annotation_matrix=True, 
-#                                                           dataset_path=dataset_path, 
-#                                                           classes=CLASSES, 
-#                                                           box_threshold=BOX_THRESHOLD, 
-#                                                           text_threshold=TEXT_THRESHOLD, 
-#                                                           nms_threshold=NMS_THRESHOLD)
-#     print(annotation_matrix)
+    # Create an annotation matrix for a dataset
+    dataset_path = "test_dataset"
+    annotation_matrix = manager.occ_proba_disjoint_tensor(matrix = None, 
+                                                          apply_on_annotation_matrix=True, 
+                                                          dataset_path=dataset_path, 
+                                                          classes=CLASSES, 
+                                                          box_threshold=BOX_THRESHOLD, 
+                                                          text_threshold=TEXT_THRESHOLD, 
+                                                          nms_threshold=NMS_THRESHOLD)
+    print(annotation_matrix)
