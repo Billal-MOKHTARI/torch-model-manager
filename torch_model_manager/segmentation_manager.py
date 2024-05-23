@@ -14,8 +14,105 @@ from segment_anything import sam_model_registry, SamPredictor
 from scipy.stats import hmean
 import pandas as pd
 from tqdm import tqdm
+from PIL import Image
+
+from sklearn.preprocessing import LabelEncoder
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+# class SegmentationManager:
+#     def __init__(self, sam_type='vit_h', checkpoint_path=None, return_prompts=False, device=DEVICE):
+#         self.device = device
+
+#         self.lang_sam = LangSAM(sam_type=sam_type, ckpt_path=checkpoint_path, return_prompts=return_prompts)
+#     def lang_segment(self, image_path, text_prompt, box_threshold, text_threshold):
+#         image_pil = Image.open(image_path).convert("RGB")
+#         masks, boxes, phrases, logits = self.lang_sam.predict(image_pil, text_prompt=text_prompt, text_threshold=text_threshold, box_threshold=box_threshold)
+#         masks = masks.cpu().numpy()
+#         boxes = boxes.cpu().numpy()
+#         phrases = phrases.cpu().numpy()
+#         logits = logits.cpu().numpy()
+#         return sv.Detections(xyxy=boxes, confidence=logits, class_id=phrases, mask=masks)
+    
+#     def create_annotation_matrix(self, dataset_path, classes, box_threshold, text_threshold, agg=hmean, run=None, output_namespaces=None):
+#         """
+#         Create an annotation matrix for a dataset.
+
+#         Parameters:
+#         - dataset_path (str): Path to the dataset.
+#         - classes (list): List of classes.
+
+#         Returns:
+#         - np.ndarray: Annotation matrix with shape (num_images, num_classes).
+#         """
+#         # Import image base paths
+#         image_ids = sorted(os.listdir(dataset_path))
+
+#         # Create a DataFrame full of zeros
+#         annotation_matrix = pd.DataFrame(data=np.zeros((len(image_ids), len(classes))), index=image_ids, columns=classes)
+
+#         for image_name in tqdm(image_ids, desc="Creating annotation matrix", unit="image"):
+#             image_path = os.path.join(dataset_path, image_name)
+
+#             # Apply the grounding SAM pipeline
+#             detections = self.lang_segment(image_path, ". ".join(classes), box_threshold=box_threshold, text_threshold=text_threshold)
+#             if run is not None and output_namespaces["detections"] is not None:
+#                 run.log_files(data = detections, namespace=os.path.join(output_namespaces["detections"], image_name), extension="pkl", wait=True)
+#             # Calculate the harmonic mean of confidences
+#             confidences = detections.confidence
+#             class_ids = [classes[id] for id in detections.class_id]
+#             harmonic_means = self.aggregator(class_ids, confidences, agg=agg)
+#             annotation_matrix.loc[image_name, harmonic_means[:, 0]] = harmonic_means[:, 1]
+#         if run is not None and output_namespaces["annotation_matrix"] is not None:
+#             run.log_dataframe(dataframe=annotation_matrix, namespace=output_namespaces["annotation_matrix"], csv_format=True, index=True, wait=True)
+
+#         return annotation_matrix
+
+#     def occ_proba_disjoint_tensor(self, matrix: pd.DataFrame = None, apply_on_annotation_matrix = True, run=None, output_namespaces=None, **kwargs):
+#         """
+#         Calculate the occurrence probability disjoint matrix.
+
+#         Parameters:
+#         - matrix (np.ndarray): Annotation matrix with shape (num_images, num_classes).
+
+#         Returns:
+#         - np.ndarray: Occurrence probability disjoint matrix with shape (num_classes, num_classes).
+#         """
+#         dataset_path = kwargs.get("dataset_path", None)
+#         classes = kwargs.get("classes", None)
+#         box_threshold = kwargs.get("box_threshold", 0.25)
+#         text_threshold = kwargs.get("text_threshold", 0.25)
+
+#         agg = kwargs.get("agg", hmean)
+#         annotation_matrix_processing = kwargs.get("annotation_matrix_processing", None)
+#         annotation_matrix_processing_args = kwargs.get("annotation_matrix_processing_args", {})
+#         if apply_on_annotation_matrix:
+#             assert matrix is None, "Annotation matrix should not be provided."
+#             matrix = self.create_annotation_matrix(dataset_path=dataset_path, 
+#                                                    classes=classes, 
+#                                                    box_threshold=box_threshold, 
+#                                                    text_threshold=text_threshold,
+#                                                    agg=agg,
+#                                                    run=run,
+#                                                    output_namespaces=output_namespaces)
+#         if annotation_matrix_processing is not None:
+#             matrix = annotation_matrix_processing(matrix, **annotation_matrix_processing_args)
+
+#         classes = matrix.columns
+#         num_rows, num_cols = matrix.shape
+
+#         tensor = np.zeros(shape=(num_cols, num_rows, num_rows))
+#         for i, c in enumerate(classes):
+#             column = matrix.loc[:, c].values
+#             column = np.array([float(val) for val in column]).reshape(len(column), 1)
+
+#             # The result is square rooted to normalize the values
+#             mat = np.sqrt(column * column.T)       
+#             tensor[i] = mat
+#         if run is not None and output_namespaces["adjacency_tensor"] is not None:
+#             run.log_files(data=tensor, namespace=output_namespaces["adjacency_tensor"], extension="pkl", wait=True)
+
+#         return {"adjacency_tensor" : tensor, "index": matrix.index, "columns": classes, "annotation_matrix": matrix}
 
 
 class SegmentationManager:
@@ -56,9 +153,11 @@ class SegmentationManager:
                 os.system(f"mv sam_vit_l_0b3195.pth {sam_checkpoint_path}")
 
         if g_dino_backbone == "swin_t":
+            config_name = "GroundingDINO_SwinT_OGC.py"
             g_dino_checkpoint_path = os.path.join(g_dino_checkpoint_path, "groundingdino_swint_ogc.pth")
-            g_dino_model_config_path = os.path.join(g_dino_model_config_path, "GroundingDINO_SwinT_OGC.py")
-            
+            g_dino_model_config_path = os.path.join(g_dino_model_config_path, config_name)
+
+
             if not os.path.exists(g_dino_checkpoint_path):
                 os.system(f"wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth")
                 os.system(f"mv groundingdino_swint_ogc.pth {g_dino_checkpoint_path}")
@@ -212,7 +311,7 @@ class SegmentationManager:
         if output_path is not None:
             self.save_image(annotated_image, output_path)
 
-        return detections
+        return detections, annotated_image
     
     def aggregator(self, classes, confidences, agg=hmean):
         """
@@ -237,7 +336,7 @@ class SegmentationManager:
 
         return np.array(result)
 
-    def create_annotation_matrix(self, dataset_path, classes, box_threshold, text_threshold, nms_threshold, agg=hmean):
+    def create_annotation_matrix(self, dataset_path, classes, box_threshold, text_threshold, nms_threshold, agg=hmean, run=None, output_namespaces=None):
         """
         Create an annotation matrix for a dataset.
 
@@ -258,16 +357,26 @@ class SegmentationManager:
             image_path = os.path.join(dataset_path, image_name)
 
             # Apply the grounding SAM pipeline
-            detections = self.grounding_sam(image_path, classes, box_threshold=box_threshold, text_threshold=text_threshold, nms_threshold=nms_threshold)
+            detections, annotated_image = self.grounding_sam(image_path, 
+                                                             classes, 
+                                                             box_threshold=box_threshold, 
+                                                             text_threshold=text_threshold, 
+                                                             nms_threshold=nms_threshold)
+            if run is not None and output_namespaces["annotated_images"] is not None:
+                run.log_tensors(tensors=[torch.Tensor(annotated_image)], paths=[os.path.join(output_namespaces["annotated_images"], image_name)], on_series=False)
+            if run is not None and output_namespaces["detections"] is not None:
+                run.log_files(data = detections, namespace=os.path.join(output_namespaces["detections"], image_name), extension="pkl", wait=True)
             # Calculate the harmonic mean of confidences
             confidences = detections.confidence
             class_ids = [classes[id] for id in detections.class_id]
             harmonic_means = self.aggregator(class_ids, confidences, agg=agg)
             annotation_matrix.loc[image_name, harmonic_means[:, 0]] = harmonic_means[:, 1]
+        if run is not None and output_namespaces["annotation_matrix"] is not None:
+            run.log_dataframe(dataframe=annotation_matrix, namespace=output_namespaces["annotation_matrix"], csv_format=True, index=True, wait=True)
 
         return annotation_matrix
     
-    def occ_proba_disjoint_tensor(self, matrix: pd.DataFrame = None, apply_on_annotation_matrix = True, **kwargs):
+    def occ_proba_disjoint_tensor(self, matrix: pd.DataFrame = None, apply_on_annotation_matrix = True, run=None, output_namespaces=None, **kwargs):
         """
         Calculate the occurrence probability disjoint matrix.
 
@@ -292,7 +401,9 @@ class SegmentationManager:
                                                    box_threshold=box_threshold, 
                                                    text_threshold=text_threshold,
                                                    nms_threshold=nms_threshold, 
-                                                   agg=agg)
+                                                   agg=agg,
+                                                   run=run,
+                                                   output_namespaces=output_namespaces)
         if annotation_matrix_processing is not None:
             matrix = annotation_matrix_processing(matrix, **annotation_matrix_processing_args)
 
@@ -305,36 +416,36 @@ class SegmentationManager:
             column = np.array([float(val) for val in column]).reshape(len(column), 1)
 
             # The result is square rooted to normalize the values
-            mat = np.sqrt(column * column.T)
-            
+            mat = np.sqrt(column * column.T)       
             tensor[i] = mat
+        if run is not None and output_namespaces["adjacency_tensor"] is not None:
+            run.log_files(data=tensor, namespace=output_namespaces["adjacency_tensor"], extension="pkl", wait=True)
 
-        return tensor, matrix.index, classes
-    
-    
+        return {"adjacency_tensor" : tensor, "index": matrix.index, "columns": classes, "annotation_matrix": matrix}
+
     def save_image(self, image, path):
         cv2.imwrite(path, image)
         
-# # Example usage
-if __name__ == "__main__":
-    SOURCE_IMAGE_PATH = "G0041951.JPG"
-    CLASSES = ["person", "banner", "finger", "hand", "foot", "glasses", "desert", "sky", "clouds"]
-    BOX_THRESHOLD = 0.3
-    TEXT_THRESHOLD = 0.25
-    NMS_THRESHOLD = 0.3
+# # # Example usage
+# if __name__ == "__main__":
+#     SOURCE_IMAGE_PATH = "G0041951.JPG"
+#     CLASSES = ["person", "banner", "finger", "hand", "foot", "glasses", "desert", "sky", "clouds"]
+#     BOX_THRESHOLD = 0.3
+#     TEXT_THRESHOLD = 0.25
+#     NMS_THRESHOLD = 0.3
 
-    manager = SegmentationManager()
+#     manager = SegmentationManager()
 
-    # Apply the grounding SAM pipeline
-    # detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
+#     # Apply the grounding SAM pipeline
+#     # detections = manager.grounding_sam(SOURCE_IMAGE_PATH, CLASSES, BOX_THRESHOLD, TEXT_THRESHOLD, NMS_THRESHOLD, "grounded_sam_annotated_image.jpg")
 
-    # Create an annotation matrix for a dataset
-    dataset_path = "test_dataset"
-    annotation_matrix = manager.occ_proba_disjoint_tensor(matrix = None, 
-                                                          apply_on_annotation_matrix=True, 
-                                                          dataset_path=dataset_path, 
-                                                          classes=CLASSES, 
-                                                          box_threshold=BOX_THRESHOLD, 
-                                                          text_threshold=TEXT_THRESHOLD, 
-                                                          nms_threshold=NMS_THRESHOLD)
+#     # Create an annotation matrix for a dataset
+#     dataset_path = "test_dataset"
+#     annotation_matrix = manager.occ_proba_disjoint_tensor(matrix = None, 
+#                                                           apply_on_annotation_matrix=True, 
+#                                                           dataset_path=dataset_path, 
+#                                                           classes=CLASSES, 
+#                                                           box_threshold=BOX_THRESHOLD, 
+#                                                           text_threshold=TEXT_THRESHOLD, 
+#                                                           nms_threshold=NMS_THRESHOLD)
 

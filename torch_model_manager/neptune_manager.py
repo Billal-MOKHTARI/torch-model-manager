@@ -131,7 +131,7 @@ class NeptuneManager:
         return list(struct.keys())
 
     def log_tensors(self, 
-                    tensors, 
+                    tensors: torch.Tensor, 
                     descriptions: List[str] = None, 
                     names: List[str] = None, 
                     paths: List[str] = None, 

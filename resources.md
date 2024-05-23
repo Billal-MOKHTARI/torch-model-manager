@@ -7,3 +7,4 @@ https://huggingface.co/spaces/gligen/demo
 https://github.com/showlab/Image2Paragraph/tree/main
 https://github.com/SysCV/sam-hq#model-checkpoints
 https://colab.research.google.com/drive/1QwAbn5hsdqKOD5niuBzuqQX4eLCbNKFL?usp=sharing
+https://github.com/luca-medeiros/lang-segment-anything
