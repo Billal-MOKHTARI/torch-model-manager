@@ -15,7 +15,8 @@ from scipy.stats import hmean
 import pandas as pd
 from tqdm import tqdm
 from PIL import Image
-
+import matplotlib.pyplot as plt
+from torchvision import transforms
 from sklearn.preprocessing import LabelEncoder
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -286,6 +287,18 @@ class SegmentationManager:
 
         confidences = detections.confidence
         class_ids = detections.class_id
+        # Find indices of None values
+        none_indices = np.where(class_ids == None)[0]
+
+        # Remove None values
+        class_ids = np.delete(class_ids, none_indices)
+        confidences = np.delete(confidences, none_indices)
+        detections.xyxy = np.delete(detections.xyxy, none_indices, axis=0)
+        detections.mask = np.delete(detections.mask, none_indices, axis=0)
+        detections.class_id = class_ids
+        detections.confidence = confidences
+        print(detections)
+
         labels = [f"{classes[class_id]} {confidence:0.2f}" for class_id, confidence in zip(class_ids, confidences)]
 
         annotated_image = mask_annotator.annotate(scene=image.copy(), detections=detections)
@@ -362,8 +375,15 @@ class SegmentationManager:
                                                              box_threshold=box_threshold, 
                                                              text_threshold=text_threshold, 
                                                              nms_threshold=nms_threshold)
+        
             if run is not None and output_namespaces["annotated_images"] is not None:
-                run.log_tensors(tensors=[torch.Tensor(annotated_image)], paths=[os.path.join(output_namespaces["annotated_images"], image_name)], on_series=False)
+                # Define a transform to convert the image to tensor
+                transform = transforms.ToTensor()
+
+                # Convert the image to PyTorch tensor
+                rgb_image = transform(annotated_image)
+                rgb_image = rgb_image[[2, 1, 0], :, :]
+                run.log_tensors(tensors=[rgb_image], paths=[os.path.join(output_namespaces["annotated_images"], image_name)], on_series=False)
             if run is not None and output_namespaces["detections"] is not None:
                 run.log_files(data = detections, namespace=os.path.join(output_namespaces["detections"], image_name), extension="pkl", wait=True)
             # Calculate the harmonic mean of confidences
