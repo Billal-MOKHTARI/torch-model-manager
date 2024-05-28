@@ -10,7 +10,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from groundingdino.util.inference import Model
 from utils import helpers
-from segment_anything import sam_model_registry, SamPredictor
+from segment_anything import sam_model_registry, SamPredictor, SamAutomaticMaskGenerator
 from scipy.stats import hmean
 import pandas as pd
 from tqdm import tqdm
@@ -168,14 +168,16 @@ class SegmentationManager:
                                           model_checkpoint_path=g_dino_checkpoint_path,
                                           device = self.device)
 
-        sam = sam_model_registry[sam_type](checkpoint=sam_checkpoint_path)
-        sam.to(device=self.device)
-        self.sam_predictor = SamPredictor(sam)
+        self.sam = sam_model_registry[sam_type](checkpoint=sam_checkpoint_path)
+        self.sam.to(device=self.device)
+        self.sam_predictor = SamPredictor(self.sam)
+        self.mask_generator = SamAutomaticMaskGenerator(self.sam)
 
     def load_image(self, image_path):
         return cv2.imread(image_path)
 
-
+    def set_mask_generator_(self, **kwargs):
+        self.mask_generator = SamAutomaticMaskGenerator(self.sam, **kwargs)
 
     def detect_objects(self, image, classes, box_threshold=0.25, text_threshold=0.25):
         detections = self.grounding_dino_model.predict_with_classes(
@@ -297,7 +299,6 @@ class SegmentationManager:
         detections.mask = np.delete(detections.mask, none_indices, axis=0)
         detections.class_id = class_ids
         detections.confidence = confidences
-        print(detections)
 
         labels = [f"{classes[class_id]} {confidence:0.2f}" for class_id, confidence in zip(class_ids, confidences)]
 
@@ -445,6 +446,48 @@ class SegmentationManager:
 
     def save_image(self, image, path):
         cv2.imwrite(path, image)
+
+    def auto_segmentation(self, img_path, img_size=(1024, 1024), run=None, output_namespaces=None, **kwargs):
+        def show_anns(anns):
+            if len(anns) == 0:
+                return
+            sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
+
+            img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1], 4))
+            img[:,:,3] = 0
+            for ann in sorted_anns:
+                m = ann['segmentation']
+                color_mask = np.concatenate([np.random.random(3), [0.35]])
+                img[m] = color_mask
+            return img
+            
+        # Read the image
+        image = cv2.imread(img_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.resize(image, img_size)
+
+        if kwargs != {}:
+            self.set_mask_generator_(**kwargs)
+
+        masks = self.mask_generator.generate(image)
+        annot_img = show_anns(masks)
+
+        if run is not None:
+            if output_namespaces["annotated_images"] is not None:
+                # Define a transform to convert the image to tensor
+                transform = transforms.ToTensor()
+
+                # Convert the image to PyTorch tensor
+                rgb_image = transform(image)
+                rgb_image = rgb_image[[2, 1, 0], :, :]
+                run.log_tensors(tensors=[rgb_image], paths=[os.path.join(output_namespaces["annotated_images"], img_path.split("/")[-1])], on_series=False)
+            
+            if output_namespaces["detections"] is not None:
+                image_name = img_path.split("/")[-1]
+                image_name = image_name.split(".")[0]
+                run.log_files(data = masks, namespace=os.path.join(output_namespaces["detections"], image_name), extension="pkl", wait=True)
+
+        return masks, annot_img
         
 # # # Example usage
 # if __name__ == "__main__":
