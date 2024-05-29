@@ -17,7 +17,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='torch-model-manager',
-    version='0.4.3.dev2',
+    version='1.0.1.dev4',
     description='A package for managing PyTorch models',
     author='Billal MOKHTARI',
     author_email='mokhtaribillal1@gmail.com',

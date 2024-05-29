@@ -1,11 +1,12 @@
 import os
 import subprocess
     
-def clone_repo(project, user, branch = None, token=None, move_to_root=True, change_dir=None):
+def clone_repo(project, user, branch = None, token=None, move_to_root=True, delete_original = True, change_dir=None):
     """
     Clone a repository from a given URL to a given directory.
     """
     assert (move_to_root and not change_dir) or (not move_to_root and change_dir), "Only one of move_to_root and change_dir can be True"
+
     # Clone the repository
     if token is not None:
         github_url = f"https://{token}@github.com/{user}/{project}.git"
@@ -21,6 +22,10 @@ def clone_repo(project, user, branch = None, token=None, move_to_root=True, chan
     
     if move_to_root:
         os.system(f"mv {project}/* .")
+        if delete_original:
+            os.system(f"rm -rf {project}")
+    
+
     
     if change_dir:
         os.chdir(project)
@@ -38,12 +43,11 @@ def install_dependencies(requirements_file="requirements.txt", script_file="requ
     if script_file is not None:
         os.system(f"{compiler} {script_file}")
         
-def execute_command(executable, *args):
+def execute_command(*args):
     """
     Execute a command with given executable and arguments.
     """
     # Construct the command
-    command = [executable] + list(args)
-
+    command = " ".join(list(args))
     # Execute the command using subprocess
-    subprocess.run(command)
+    os.system(command)
