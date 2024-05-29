@@ -25,19 +25,18 @@ def clone_repo(project, user, branch = None, token=None, move_to_root=True, chan
     if change_dir:
         os.chdir(project)
 
-def install_dependencies(requirements_file="requirements.txt", script_file="requirements.sh"):
+def install_dependencies(requirements_file="requirements.txt", script_file="requirements.sh", compiler="bash"):
     """
     Install the requirements from the requirements.txt file.
     """
-    assert os.path.exists(requirements_file) or os.path.exists(script_file), "Both requirements.txt and requirements.sh files are not found"
+    
     assert requirements_file is not None or script_file is not None, "Both requirements.txt and requirements.sh files are not found"
     
     if requirements_file is not None:
         os.system(f"pip install -r {requirements_file}")
     
     if script_file is not None:
-        os.chmod(script_file, 0o777)
-        os.system(f"./{script_file}")
+        os.system(f"{compiler} {script_file}")
         
 def execute_command(executable, *args):
     """

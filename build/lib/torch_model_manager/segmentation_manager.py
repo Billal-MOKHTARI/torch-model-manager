@@ -447,7 +447,7 @@ class SegmentationManager:
     def save_image(self, image, path):
         cv2.imwrite(path, image)
 
-    def auto_segmentation(self, img_path, img_size=(1024, 1024), run=None, output_namespaces=None, **kwargs):
+    def auto_segmentation(self, img_path, img_size=None, run=None, output_namespaces=None, **kwargs):
         def show_anns(anns):
             if len(anns) == 0:
                 return
@@ -464,7 +464,8 @@ class SegmentationManager:
         # Read the image
         image = cv2.imread(img_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = cv2.resize(image, img_size)
+        if img_size is not None:
+            image = cv2.resize(image, img_size)
 
         if kwargs != {}:
             self.set_mask_generator_(**kwargs)
@@ -478,7 +479,7 @@ class SegmentationManager:
                 transform = transforms.ToTensor()
 
                 # Convert the image to PyTorch tensor
-                rgb_image = transform(image)
+                rgb_image = transform(annot_img)
                 rgb_image = rgb_image[[2, 1, 0], :, :]
                 run.log_tensors(tensors=[rgb_image], paths=[os.path.join(output_namespaces["annotated_images"], img_path.split("/")[-1])], on_series=False)
             
@@ -488,6 +489,13 @@ class SegmentationManager:
                 run.log_files(data = masks, namespace=os.path.join(output_namespaces["detections"], image_name), extension="pkl", wait=True)
 
         return masks, annot_img
+    
+    def auto_seg_images(self, image_folder_path, image_size=None, run=None, output_namespaces=None, **kwargs):
+        image_paths = sorted([os.path.join(image_folder_path, img) for img in os.listdir(image_folder_path)])
+        for img_path in tqdm(image_paths, desc="Segmenting images", unit="image"):
+            self.auto_segmentation(img_path, image_size, run, output_namespaces, **kwargs)
+    
+    
         
 # # # Example usage
 # if __name__ == "__main__":
