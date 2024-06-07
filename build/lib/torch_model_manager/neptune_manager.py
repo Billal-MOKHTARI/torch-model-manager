@@ -73,6 +73,30 @@ class NeptuneManager:
                 json.dump({}, json_file)
             
 
+    def download_folder_from_neptune(self, namespace, destination):
+        """
+        Download a folder recursively from Neptune.
+
+        Args:
+            run_id (str): The Neptune run ID.
+            namespace (str): The Neptune namespace of the folder.
+            destination (str): The local destination folder.
+        """
+    
+        # Get the elements of the namespace
+        items = self.fetch_files(namespace)
+        
+        # Create estination folder if it doesn't exist
+        os.makedirs(destination, exist_ok=True)
+        
+        for item in items:
+            full_namespace = os.path.join(namespace, item)
+            NeptuneManager.project[full_namespace].download(destination)
+        
+        
+        NeptuneManager.project.stop()
+
+
     def get_project_list(self):
         """
         Get the list of projects.
@@ -778,3 +802,25 @@ class NeptuneManager:
                 list: A list of fetched data values.
             """
             return self.run[namespace].fetch_values()
+        
+        def download_folder_from_neptune(self, namespace, destination):
+            """
+            Download a folder recursively from Neptune.
+
+            Args:
+                namespace (str): The Neptune namespace of the folder.
+                destination (str): The local destination folder.
+            """
+        
+            # Get the elements of the namespace
+            items = self.fetch_files(namespace)
+            
+            # Create estination folder if it doesn't exist
+            os.makedirs(destination, exist_ok=True)
+            
+            for item in items:
+                full_namespace = os.path.join(namespace, item)
+                self.run[full_namespace].download(destination)
+            
+            
+            self.run.stop()
