@@ -23,6 +23,7 @@ from utils import helpers
 import torch_model_manager as tmm
 from torchcam.utils import overlay_mask
 import pickle
+from neptune.new.exceptions import NeptuneClientError
 import tempfile
 class NeptuneManager:
     """
@@ -778,3 +779,51 @@ class NeptuneManager:
                 list: A list of fetched data values.
             """
             return self.run[namespace].fetch_values()
+        
+        def download_folder_from_neptune(self, namespace, destination):
+            """
+            Download a folder recursively from Neptune.
+
+            Args:
+                run_id (str): The Neptune run ID.
+                namespace (str): The Neptune namespace of the folder.
+                destination (str): The local destination folder.
+            """
+            
+            try:
+                self.download_recursive(self.run, namespace, destination)
+            except NeptuneClientError as e:
+                print(f"An error occurred: {e}")
+            finally:
+                self.run.stop()
+
+        def download_recursive(self, namespace, destination):
+            """
+            Recursively download files from Neptune namespace.
+
+            Args:
+                run: Neptune run object.
+                namespace (str): The Neptune namespace of the folder.
+                destination (str): The local destination folder.
+            """
+            # List all the items in the namespace
+            items = self.run[namespace].fetch_files_list()
+
+            for item in items:
+                item_path = item['path']
+                item_type = item['type']
+                
+                # Generate the local path
+                local_path = os.path.join(destination, item_path[len(namespace):].lstrip('/'))
+
+                if item_type == 'file':
+                    # Create directories if they do not exist
+                    os.makedirs(os.path.dirname(local_path), exist_ok=True)
+                    # Download the file
+                    self.run[item_path].download(local_path)
+                    print(f"Downloaded {item_path} to {local_path}")
+                elif item_type == 'directory':
+                    # Recursively download the directory
+                    self.download_recursive(self.run, item_path, destination)
+                else:
+                    print(f"Unknown item type: {item_type} for item {item_path}")

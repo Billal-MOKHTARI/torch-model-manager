@@ -1,1 +1,4 @@
 PKG-INFO
+*.pyc
+*.whl
+*.tar.gz
