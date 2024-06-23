@@ -268,7 +268,7 @@ class NeptuneManager:
             
         # Get the needed layers
         layers = model_manager.get_layers_by_indexes(indexes)
-            
+
         result = []
         for im in input_data:
             # Set the model to evaluation mode
